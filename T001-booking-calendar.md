@@ -128,3 +128,14 @@ No engineering escalation is warranted based solely on this successful booking t
 - [T001 Booking Verification Screenshot](T001-booking-verified.png.png)
 
 *This investigation was conducted in a public OpenEMR demo environment using demo data. It does not represent testing of Health Hue Hub itself.*
+## Verified Hands-On Testing
+
+**T001 — Appointment Booking & Calendar Verification**
+
+- Platform tested: OpenEMR public demo
+- Workflow: Appointment creation, availability search, provider calendar verification
+- Result: PASS — appointment successfully appeared in the provider calendar
+- Original missing-booking complaint: Not reproduced
+- Evidence: [Investigation Report](T001-booking-calendar.md) | [Screenshot](T001-booking-verified.png)
+
+This is an independent practice exercise, not testing performed on Health Hue Hub.
