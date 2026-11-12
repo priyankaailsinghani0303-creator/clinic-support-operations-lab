@@ -244,7 +244,7 @@ with queue_tab:
 
     st.dataframe(
         filtered,
-        use_container_width=True,
+        width="stretch",
         hide_index=True,
     )
 
@@ -388,7 +388,7 @@ with routing_tab:
 
         r1, r2 = st.columns(2)
 
-        r1.metric("Tickets Routed", len(routed))
+        r1.metric("Routing Suggestions", len(routed))
         r2.metric(
             "Suggested Teams",
             routed["suggested_initial_team"].nunique(),
@@ -400,7 +400,7 @@ with routing_tab:
             hide_index=True,
         )
 
-        st.subheader("Tickets by Initial Team")
+        st.subheader("Tickets by Suggested Initial Team")
         st.bar_chart(
             routed["suggested_initial_team"].value_counts()
         )

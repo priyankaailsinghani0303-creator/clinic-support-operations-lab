@@ -1,6 +1,6 @@
 # Missing Appointment — Calendar Filter Investigation
 
-**Result:** Visibility issue reproduced and resolved by restoring the facility filter. No software defect established.
+**Evidence status:** Screenshots show the appointment visible with All Facilities and hidden with Aurora Breadth Clinic. Restoration was reported in the original investigation, but is not independently evidenced by a fresh capture. No software defect established.
 
 | Test context | Details |
 |---|---|
@@ -35,9 +35,9 @@ Select **Aurora Breadth Clinic** in the facility dropdown. The appointment disap
 
 ### 3. Restore the view and verify
 
-Select **All Facilities** again. The same appointment reappears at **08:00**. No replacement booking is needed.
+**Verification step to repeat:** Select **All Facilities** again and confirm the same appointment appears at **08:00** before creating any replacement booking.
 
-![Appointment visible after restoring All Facilities](screenshots/03-appointment-restored.jpg)
+The original restoration image is byte-for-byte identical to image 01. It is not presented as independent after-action evidence. A fresh restoration capture is still needed.
 
 ## Expected versus actual behavior
 
@@ -45,13 +45,13 @@ Select **All Facilities** again. The same appointment reappears at **08:00**. No
 |---|---|---|
 | All Facilities | Existing appointment visible | Visible at 08:00 |
 | Aurora Breadth Clinic | Appointments from other facilities excluded | Sample appointment hidden |
-| All Facilities restored | Existing appointment visible again | Same appointment reappeared |
+| All Facilities restored | Existing appointment visible again | Reported; fresh after-action capture unavailable |
 
 **Finding:** The observed behavior is consistent with facility filtering. This test reproduced the symptom of a missing appointment; it did not establish a software bug.
 
 ## Suggested customer reply
 
-> Thanks for flagging this. Please confirm the appointment date and provider, then check the facility dropdown on the left. Select All Facilities to see whether the appointment appears. In this demo test, restoring that view made the appointment visible again. Please avoid creating a duplicate until the original booking has been checked.
+> Thanks for flagging this. Please confirm the appointment date and provider, then check the facility dropdown on the left. Select All Facilities to see whether the appointment appears. If it appears, confirm it is the original appointment before making further changes. Please avoid creating a duplicate until the original booking has been checked.
 
 ## Escalation decision
 

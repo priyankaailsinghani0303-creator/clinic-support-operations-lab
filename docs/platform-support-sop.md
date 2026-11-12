@@ -4,7 +4,7 @@
 **Document:** 01 — Platform Support SOP  
 **Organization:** Fictional healthcare SaaS support environment  
 **Prepared by:** Portfolio demonstration  
-**Version:** 1.0  
+**Version:** 1.1  
 **Effective date:** November 2026  
 **Document status:** Demonstration 
 
@@ -628,7 +628,8 @@ The initial support owner remains accountable for customer communication while s
 | Scenario | Escalate To | How | Timeframe |
 |---|---|---|---|
 | Booking or calendar malfunction | Engineering Team | Support ticket with reproduction steps | According to severity and SLA |
-| Payment processing failure | Payments Team | Ticket with transaction reference and error details | Promptly, based on business impact |
+| Payment transaction discrepancy or processor-status question | Payments Team | Ticket with sanitized transaction reference and status evidence | Promptly, based on business impact |
+| Suspected payment software defect | Engineering Team | Expected/actual behavior, reproduction attempt and sanitized errors | According to severity and SLA |
 | Multiple clinics affected by messaging failure | Engineering Team | High-priority incident escalation | Immediately if widespread |
 | Individual account access issue unresolved | Engineering Team | Ticket with sanitized error details | According to applicable SLA |
 | Reproducible software defect | Engineering Team | Structured bug report with evidence | According to severity |
@@ -775,6 +776,7 @@ Notes for next shift:
 | Version | Date | Author | Changes |
 |---|---|---|---|
 | 1.0 | November 2026 | Portfolio Project Author | Initial platform support SOP created. |
+| 1.1 | November 12, 2026 | Portfolio Project Author | Clarified payment escalation; linked written case, handoff and separate resolution exercise. |
 
 **Review cadence:** Quarterly, or whenever a significant support workflow or platform process changes.
 
@@ -818,3 +820,9 @@ Notes for next shift:
 
 
 
+
+## Related written exercises
+
+- [T002 payment case and customer conversation](payment-case.md): fictional tabletop exercise; no processor access or successful live test claimed.
+- [Three-ticket shift handoff](shift-handoff.md): proposed owners and update commitments; no accepted assignments claimed.
+- [Resolution and recurring-issue exercise](resolution-pattern-exercise.md): separate fictional examples with auditable elapsed-time calculations. Active queue resolution monitoring remains unimplemented.

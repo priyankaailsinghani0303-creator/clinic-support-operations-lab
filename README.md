@@ -16,7 +16,10 @@ No local installation required to review the dashboard.
 
 | Work Sample | What to Look For |
 |---|---|
-| **[Calendar Troubleshooting Investigation](docs/calendar-reproduction.md)** | Real demo screenshots, reproduction steps, before-and-after verification, customer guidance, and escalation judgment |
+| **[Payment Case & Customer Conversation](docs/payment-case.md)** | Fictional investigation record, frustrated-customer reply, evidence gaps and proposed specialist handoff |
+| **[Three-Ticket Shift Handoff](docs/shift-handoff.md)** | Proposed owners, next actions and update deadlines; no accepted assignments claimed |
+| **[Resolution & Pattern Exercise](docs/resolution-pattern-exercise.md)** | Separate synthetic resolution calculations and recurring-issue review |
+| **[Calendar Troubleshooting Investigation](docs/calendar-reproduction.md)** | Demo screenshots of visible/hidden states, reproduction steps, evidence limitations, customer guidance and escalation judgment |
 | **[Live Support Dashboard](https://clinic-support-operations-lab-qzcgaprlcsp8dvyn7ql4rb.streamlit.app/)** | Ticket filtering, first-response SLA results, incomplete records, suggested routing, and simulated risk alerts |
 | **[Customer Help Article: Missing Appointment](docs/help-article.md)** | Simple troubleshooting steps for nontechnical clinic staff, with clear guidance on when to contact support |
 | **[Platform Support SOP](docs/platform-support-sop.md)** | Triage, troubleshooting, customer updates, bug-report requirements, escalation, screen-sharing procedures, and shift handoffs |
@@ -87,9 +90,9 @@ Downloadable CSV reports support further review and handoffs.
 | Implemented or Written | Documented Procedure / Future Evidence |
 |---|---|
 | Interactive dashboard and fictional ticket queue | Confirmed software-defect reproduction |
-| [Calendar filter investigation with screenshots](docs/calendar-reproduction.md) | Narrated troubleshooting walkthrough |
-| First-response SLA calculations and missing-data handling | Measured resolution times |
-| Suggested initial team routing | Accepted assignments and completed handoffs |
+| [Calendar filter investigation with screenshots](docs/calendar-reproduction.md) | Fresh independent restoration capture and narrated walkthrough |
+| First-response SLA calculations and missing-data handling; separate written resolution exercise | Actual resolution records and automated active-queue resolution tracking |
+| Suggested initial team routing and fictional written handoff | Accepted operational assignments and handoffs |
 | Customer-facing help article | Recorded screen-share walkthrough |
 | Support SOP with example customer replies | Real ticket, chat, or call outcomes |
 
@@ -105,7 +108,7 @@ The SOP includes privacy-conscious practices such as requesting only necessary i
 - The dashboard, SLA checker, and ticket router use [`support_rules.py`](support_rules.py).
 - First-response calculations use elapsed time in UTC, without business-hour pauses.
 - Risk alerts are hypothetical simulations.
-- Resolution targets are reference values; resolution performance is not calculated.
+- Resolution targets are reference values; active-queue resolution performance is not calculated. A [separate written exercise](docs/resolution-pattern-exercise.md) shows synthetic elapsed-time calculations.
 - [`tickets.csv`](tickets.csv) is the active sample queue.
 - `tickets_backup.csv` is an inactive historical snapshot.
 
@@ -128,3 +131,11 @@ python3 -m unittest discover -s tests -v
 ```
 
 </details>
+
+## Evidence status
+
+The calendar visible/hidden images are demo screenshots. The former restoration image duplicates the initial image and is not independent proof of restoration. A fresh capture remains outstanding.
+
+The payment case, handoff and resolution/pattern exercise are fictional written work samples, not completed live investigations, accepted assignments or customer outcomes. North American shift availability must be confirmed directly with the candidate; the SOP describes the role's coverage requirement.
+
+Local verification on November 12, 2026: the seven existing shared-rule tests passed. The dashboard was checked locally for initial rendering, Medium-only filtering and empty selection. This does not establish that the hosted dashboard is running the same version. No hosted verification or successful payment test is claimed.
