@@ -32,7 +32,7 @@ The clinic reports that the appointment is missing from the calendar.
 - [ ] Check whether the issue occurs after refreshing the calendar.
 - [ ] Attempt to reproduce the issue using fictional test data.
 
-**Investigation status:** Not started. No root cause confirmed.
+**Investigation status:** Initial hands-on investigation completed using the OpenEMR public demo. Appointment creation and calendar visibility were successfully tested. The original reported issue was not reproduced, and its root cause remains undetermined.
 
 ## Proposed Steps to Reproduce
 
