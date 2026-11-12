@@ -39,7 +39,27 @@ The clinic reports missing reminders. The SOP covers notification triggers, deli
 > **Timestamp records missing — verify history before determining SLA status.**
 
 ## Bug-Report Structure
+## Support Playbook
 
+Explore the workflow by topic:
+
+| Area | What It Covers |
+|---|---|
+| **[1. Receive & Triage](docs/platform-support-sop.md#7-support-ticket-triage-flowchart)** | Clarify the issue, assess clinic impact and set priority |
+| **[2. Troubleshoot](docs/platform-support-sop.md#8-booking--calendar-troubleshooting)** | Booking/calendar checks, followed by payments, messaging and account access |
+| **[3. Investigate & Escalate](docs/platform-support-sop.md#12-bug-reproduction--technical-documentation)** | Expected versus actual behavior, reproduction steps and evidence |
+| **[4. Guide & Educate](docs/platform-support-sop.md#13-screen-share-support--customer-training)** | Screen-share preparation, clear explanations and customer practice |
+| **[5. Track & Review](docs/platform-support-sop.md#14-support-ticket-documentation--sla-management)** | First-response targets, unevaluable records and review triggers |
+| **[6. Hand Over](docs/platform-support-sop.md#17-end-of-shift-handoff--sop-version-control)** | Ticket status, ownership, next actions and outstanding follow-ups |
+
+### Full SOP
+
+[Read the complete Platform Support SOP →](docs/platform-support-sop.md)
+
+Includes detailed communication standards, troubleshooting procedures,
+routing, escalation, help-article management and shift preparation.
+
+*Independent portfolio demonstration using fictional scenarios.*
 The SOP documents how to capture:
 
 - Expected versus actual behavior.
