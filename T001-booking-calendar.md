@@ -20,7 +20,7 @@ When a patient successfully books an appointment online, the appointment should 
 
 The clinic reports that the appointment is missing from the calendar.
 
-**Verification status:** Not yet reproduced. Root cause unknown.
+ **Verification status:** Hands-on booking test completed in OpenEMR on November 12, 2026. The appointment appeared correctly in the provider calendar. The original fictional missing-booking issue was not reproduced; its root cause remains unknown.
 
 ## Troubleshooting Checklist
 
@@ -127,6 +127,6 @@ No engineering escalation is warranted based solely on this successful booking t
 
 ### Evidence
 
-- [T001 Booking Verification Screenshot](T001-booking-verified.png)
+- [T001 Booking Verification Screenshot](T001-booking-verified.png.png)
 
 *This investigation was conducted in a public OpenEMR demo environment using demo data. It does not represent testing of Health Hue Hub itself.*
