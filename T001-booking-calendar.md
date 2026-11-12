@@ -52,9 +52,7 @@ The appointment appears in the correct provider's calendar at the selected date 
 
 Not yet tested. The clinic-reported issue is that the appointment does not appear.
 
-## Reproduction Status
-
-Not attempted. Requires a working test booking application.
+**Reproduction Status:** Tested in OpenEMR public demo — issue not reproduced. The appointment was successfully created and appeared in the provider calendar at the selected time.
 
 ## Engineering Escalation Checklist
 
