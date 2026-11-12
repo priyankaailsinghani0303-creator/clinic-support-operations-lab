@@ -74,3 +74,59 @@ Not attempted. Requires a working test booking application.
 Escalate to engineering if a suspected product defect is supported by reproducible evidence or if the issue cannot be resolved through standard troubleshooting.
 
 **Privacy:** Do not include real patient names, medical records, payment details, or other sensitive information in this public portfolio.
+## Hands-On Investigation — OpenEMR Demo
+
+**Test date:** November 12, 2026  
+**Application:** OpenEMR 8.5.0 Public Demo  
+**Test environment:** Chrome browser on Chromebook  
+**Scenario:** T001 — Booking Not Appearing in Clinic Calendar  
+**Test type:** Manual functional investigation  
+**Defect status:** Not reproduced
+
+### Test Objective
+
+Determine whether an appointment created through the OpenEMR scheduling interface appears in the correct provider calendar.
+
+### Test Steps and Observations
+
+| Step | Action | Observed Result |
+|---|---|---|
+| 1 | Opened OpenEMR Calendar | Calendar loaded successfully |
+| 2 | Opened the appointment form | Appointment configuration fields displayed |
+| 3 | Selected an existing demo patient | Patient selection completed |
+| 4 | Selected provider Billy Smith | Provider displayed in appointment form |
+| 5 | Searched for available appointments over 7 days | No openings displayed |
+| 6 | Extended availability search to 30 days | Available appointment times displayed |
+| 7 | Selected November 12, 2026, at 10:00 AM | Appointment form updated to 10:00 |
+| 8 | Saved the appointment | Appointment form closed |
+| 9 | Checked the provider calendar | Appointment appeared at 10:00 AM |
+
+### Expected Result
+
+The saved appointment should appear on the correct provider calendar at the selected date and time.
+
+### Actual Result
+
+The appointment appeared on Billy Smith's calendar on November 12, 2026, at 10:00 AM.
+
+**Outcome: PASS — Booking and calendar visibility worked in this test.**
+
+### Additional Observation
+
+The initial seven-day availability search displayed no openings, while a subsequent 30-day search displayed available times, including times on the original start date.
+
+The cause of this difference was not determined. Further controlled testing would be necessary before classifying it as a software defect.
+
+### Investigation Conclusion
+
+The original fictional complaint of a missing appointment was not reproduced in this OpenEMR test.
+
+The investigation demonstrated appointment creation, availability searching, provider selection and calendar verification.
+
+No engineering escalation is warranted based solely on this successful booking test.
+
+### Evidence
+
+- [T001 Booking Verification Screenshot](T001-booking-verified.png)
+
+*This investigation was conducted in a public OpenEMR demo environment using demo data. It does not represent testing of Health Hue Hub itself.*
