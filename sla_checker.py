@@ -1,207 +1,217 @@
+from __future__ import annotations
+
 import csv
 from datetime import datetime
+from pathlib import Path
 
-with open("sla_policy.csv", newline="") as file:
-    sla_policy = list(csv.DictReader(file))
+BASE_DIR = Path(__file__).resolve().parent
 
-with open("tickets.csv", newline="") as file:
-    tickets = list(csv.DictReader(file))
+
+def load_csv(filename: str):
+    with (BASE_DIR / filename).open(newline="") as file:
+        return list(csv.DictReader(file))
+
+
+def parse_timestamp(value: str) -> datetime:
+    if not value:
+        raise ValueError("Timestamp is missing")
+
+    formats = (
+        "%Y-%m-%d %H:%M:%S",
+        "%Y-%m-%dT%H:%M:%S",
+        "%Y-%m-%d %H:%M:%S.%f",
+        "%Y-%m-%dT%H:%M:%S.%f",
+    )
+
+    for fmt in formats:
+        try:
+            return datetime.strptime(value, fmt)
+        except ValueError:
+            continue
+
+    try:
+        return datetime.fromisoformat(value)
+    except ValueError as exc:
+        raise ValueError(f"Unsupported timestamp format: {value!r}") from exc
+
+
+def get_policy_for_ticket(ticket: dict, policy_map: dict[str, dict]) -> dict | None:
+    return policy_map.get(ticket.get("priority"))
+
+
+def response_minutes(record: dict) -> float:
+    created = parse_timestamp(record["created_at"])
+    responded = parse_timestamp(record["first_responded_at"])
+    return (responded - created).total_seconds() / 60
+
+
+def build_queue(tickets, timestamps, policy_map):
+    queue = []
+    timestamp_map = {record["ticket_id"]: record for record in timestamps if record.get("ticket_id")}
+
+    for ticket in tickets:
+        ticket_id = ticket.get("ticket_id")
+        record = timestamp_map.get(ticket_id)
+
+        if record is None:
+            alert = "RESPONSE NOT RECORDED"
+        else:
+            policy = get_policy_for_ticket(ticket, policy_map)
+            if policy is None:
+                alert = "SLA POLICY MISSING"
+            else:
+                try:
+                    minutes = response_minutes(record)
+                    target = int(policy["first_response_minutes"])
+                    alert = "SLA MET" if 0 <= minutes <= target else "SLA BREACHED"
+                except ValueError:
+                    alert = "INVALID TIMESTAMP"
+
+        queue.append((ticket, alert))
+
+    return queue
+
+
+sla_policy = load_csv("sla_policy.csv")
+tickets = load_csv("tickets.csv")
+timestamps = load_csv("ticket_timestamps.csv")
+
+policy_map = {policy["priority"]: policy for policy in sla_policy if policy.get("priority")}
+ticket_map = {ticket["ticket_id"]: ticket for ticket in tickets if ticket.get("ticket_id")}
+timestamp_map = {record["ticket_id"]: record for record in timestamps if record.get("ticket_id")}
+priority_order = {"Urgent": 1, "High": 2, "Medium": 3, "Low": 4}
+alert_order = {
+    "SLA BREACHED": 1,
+    "RESPONSE NOT RECORDED": 2,
+    "SLA MET": 3,
+    "SLA POLICY MISSING": 4,
+    "INVALID TIMESTAMP": 5,
+}
 
 print("Ticket ID | Priority | First Response (min) | Resolution (min)")
 for ticket in tickets:
-    for policy in sla_policy:
-        if ticket["priority"] == policy["priority"]:
-            print(" | ".join([ticket["ticket_id"], ticket["priority"], policy["first_response_minutes"], policy["resolution_minutes"]]))
+    policy = get_policy_for_ticket(ticket, policy_map)
+    if policy is None:
+        continue
+    print(" | ".join([
+        ticket["ticket_id"],
+        ticket["priority"],
+        policy["first_response_minutes"],
+        policy["resolution_minutes"],
+    ]))
 
-with open("ticket_timestamps.csv", newline="") as file:
-    timestamps = list(csv.DictReader(file))
-
+print("\nActual first response by ticket")
 for record in timestamps:
-    created = datetime.strptime(record["created_at"], "%Y-%m-%d %H:%M:%S")
-    responded = datetime.strptime(record["first_responded_at"], "%Y-%m-%d %H:%M:%S")
-    minutes = (responded - created).total_seconds() / 60
-    print(f"{record['ticket_id']} | Actual first response: {minutes:.0f} minutes")
+    ticket_id = record.get("ticket_id")
+    if not ticket_id:
+        continue
+    try:
+        minutes = response_minutes(record)
+    except ValueError:
+        print(f"{ticket_id} | INVALID TIMESTAMP")
+        continue
+    print(f"{ticket_id} | Actual first response: {minutes:.0f} minutes")
 
 print("\nFIRST-RESPONSE SLA COMPLIANCE")
-
+met = 0
+breached = 0
 for record in timestamps:
-    ticket = next((t for t in tickets if t["ticket_id"] == record["ticket_id"]), None)
+    ticket_id = record.get("ticket_id")
+    ticket = ticket_map.get(ticket_id)
     if ticket is None:
         continue
 
-    policy = next((p for p in sla_policy if p["priority"] == ticket["priority"]), None)
+    policy = get_policy_for_ticket(ticket, policy_map)
     if policy is None:
         continue
 
-    created = datetime.strptime(record["created_at"], "%Y-%m-%d %H:%M:%S")
-    responded = datetime.strptime(record["first_responded_at"], "%Y-%m-%d %H:%M:%S")
-
-    actual_minutes = (responded - created).total_seconds() / 60
-    target_minutes = int(policy["first_response_minutes"])
+    try:
+        actual_minutes = response_minutes(record)
+        target_minutes = int(policy["first_response_minutes"])
+    except ValueError:
+        print(f"{ticket_id} | INVALID TIMESTAMP | SKIPPED")
+        continue
 
     status = "MET" if 0 <= actual_minutes <= target_minutes else "BREACHED"
+    if status == "MET":
+        met += 1
+    else:
+        breached += 1
 
-    print(f"{record['ticket_id']} | {actual_minutes:.0f}/{target_minutes} min | {status}")
+    print(f"{ticket_id} | {actual_minutes:.0f}/{target_minutes} min | {status}")
 
 print("\nNEEDS ATTENTION")
-
 for record in timestamps:
-    ticket = next((t for t in tickets if t["ticket_id"] == record["ticket_id"]), None)
+    ticket_id = record.get("ticket_id")
+    ticket = ticket_map.get(ticket_id)
     if ticket is None:
         continue
 
-    policy = next((p for p in sla_policy if p["priority"] == ticket["priority"]), None)
+    policy = get_policy_for_ticket(ticket, policy_map)
     if policy is None:
         continue
 
-    created = datetime.strptime(record["created_at"], "%Y-%m-%d %H:%M:%S")
-    responded = datetime.strptime(record["first_responded_at"], "%Y-%m-%d %H:%M:%S")
-
-    actual = (responded - created).total_seconds() / 60
-    target = int(policy["first_response_minutes"])
+    try:
+        actual = response_minutes(record)
+        target = int(policy["first_response_minutes"])
+    except ValueError:
+        continue
 
     if actual > target:
         print(f"{ticket['ticket_id']} | {ticket['clinic']} | {ticket['issue_type']} | SLA BREACHED")
 
 print("\nSLA PERFORMANCE SUMMARY")
-
-met = 0
-breached = 0
-
-for record in timestamps:
-    ticket = next((t for t in tickets if t["ticket_id"] == record["ticket_id"]), None)
-    if ticket is None:
-        continue
-
-    policy = next((p for p in sla_policy if p["priority"] == ticket["priority"]), None)
-    if policy is None:
-        continue
-
-    created = datetime.strptime(record["created_at"], "%Y-%m-%d %H:%M:%S")
-    responded = datetime.strptime(record["first_responded_at"], "%Y-%m-%d %H:%M:%S")
-
-    actual = (responded - created).total_seconds() / 60
-    target = int(policy["first_response_minutes"])
-
-    if 0 <= actual <= target:
-        met += 1
-    else:
-        breached += 1
-
-total = met + breached
-
-print(f"Tickets evaluated: {total}")
+print(f"Tickets evaluated: {met + breached}")
 print(f"SLA met: {met}")
 print(f"SLA breached: {breached}")
-print(f"SLA compliance rate: {met / total * 100:.1f}%" if total else "No tickets evaluated")
+if met + breached:
+    print(f"SLA compliance rate: {met / (met + breached) * 100:.1f}%")
+else:
+    print("No tickets evaluated")
 
 print("\nTICKETS WITHOUT FIRST-RESPONSE RECORDS")
-
-recorded_ids = {record["ticket_id"] for record in timestamps}
-
+recorded_ids = set(timestamp_map)
 for ticket in tickets:
-    if ticket["ticket_id"] not in recorded_ids:
-        print(f"{ticket['ticket_id']} | {ticket['clinic']} | {ticket['issue_type']} | {ticket['priority']} | RESPONSE NOT RECORDED")
+    ticket_id = ticket.get("ticket_id")
+    if ticket_id not in recorded_ids:
+        print(f"{ticket_id} | {ticket['clinic']} | {ticket['issue_type']} | {ticket['priority']} | RESPONSE NOT RECORDED")
 
 print("\nTICKET PRIORITY SUMMARY")
-
 for priority in ["Urgent", "High", "Medium", "Low"]:
-    count = sum(1 for ticket in tickets if ticket["priority"] == priority)
+    count = sum(1 for ticket in tickets if ticket.get("priority") == priority)
     print(f"{priority}: {count}")
 
 print("\nSUPPORT TICKET TRIAGE QUEUE")
-
-priority_order = {
-    "Urgent": 1,
-    "High": 2,
-    "Medium": 3,
-    "Low": 4
-}
-
-sorted_tickets = sorted(
-    tickets,
-    key=lambda ticket: priority_order.get(ticket["priority"], 5)
-)
-
+sorted_tickets = sorted(tickets, key=lambda ticket: priority_order.get(ticket.get("priority"), 5))
 for ticket in sorted_tickets:
     print(f"{ticket['ticket_id']} | {ticket['priority']} | {ticket['issue_type']} | {ticket['clinic']}")
 
 print("\nTICKET QUEUE WITH SLA ALERTS")
-
 for ticket in sorted_tickets:
-    record = next(
-        (r for r in timestamps if r["ticket_id"] == ticket["ticket_id"]),
-        None
-    )
-
+    record = timestamp_map.get(ticket.get("ticket_id"))
     if record is None:
         alert = "RESPONSE NOT RECORDED"
     else:
-        policy = next(
-            (p for p in sla_policy if p["priority"] == ticket["priority"]),
-            None
-        )
-
+        policy = get_policy_for_ticket(ticket, policy_map)
         if policy is None:
             alert = "SLA POLICY MISSING"
         else:
-            created = datetime.strptime(record["created_at"], "%Y-%m-%d %H:%M:%S")
-            responded = datetime.strptime(record["first_responded_at"], "%Y-%m-%d %H:%M:%S")
-            minutes = (responded - created).total_seconds() / 60
-            target = int(policy["first_response_minutes"])
-
-            alert = "SLA MET" if 0 <= minutes <= target else "SLA BREACHED"
+            try:
+                minutes = response_minutes(record)
+                target = int(policy["first_response_minutes"])
+                alert = "SLA MET" if 0 <= minutes <= target else "SLA BREACHED"
+            except ValueError:
+                alert = "INVALID TIMESTAMP"
 
     print(f"{ticket['ticket_id']} | {ticket['priority']} | {ticket['issue_type']} | {alert}")
 
 print("\nACTION-PRIORITY TICKET QUEUE")
-
-alert_order = {
-    "SLA BREACHED": 1,
-    "RESPONSE NOT RECORDED": 2,
-    "SLA MET": 3,
-    "SLA POLICY MISSING": 4
-}
-
-queue = []
-
-for ticket in tickets:
-    record = next(
-        (r for r in timestamps if r["ticket_id"] == ticket["ticket_id"]),
-        None
-    )
-
-    if record is None:
-        alert = "RESPONSE NOT RECORDED"
-    else:
-        policy = next(
-            (p for p in sla_policy if p["priority"] == ticket["priority"]),
-            None
-        )
-
-        if policy is None:
-            alert = "SLA POLICY MISSING"
-        else:
-            created = datetime.fromisoformat(record["created_at"])
-            responded = datetime.fromisoformat(record["first_responded_at"])
-            minutes = (responded - created).total_seconds() / 60
-            target = int(policy["first_response_minutes"])
-            alert = "SLA MET" if 0 <= minutes <= target else "SLA BREACHED"
-
-    queue.append((ticket, alert))
-
-queue.sort(
-    key=lambda item: (
-        alert_order.get(item[1], 5),
-        priority_order.get(item[0]["priority"], 5)
-    )
-)
-
+queue = build_queue(tickets, timestamps, policy_map)
+queue.sort(key=lambda item: (alert_order.get(item[1], 99), priority_order.get(item[0].get("priority"), 5)))
 for ticket, alert in queue:
     print(f"{ticket['ticket_id']} | {ticket['priority']} | {alert}")
 
 print("\nSUPPORT ESCALATION RECOMMENDATIONS")
-
 for ticket, alert in queue:
     if alert == "SLA BREACHED":
         action = "Review breach, update clinic, notify support lead"
@@ -209,6 +219,8 @@ for ticket, alert in queue:
         action = "Verify response history and contact clinic if needed"
     elif alert == "SLA POLICY MISSING":
         action = "Ask support lead to verify SLA configuration"
+    elif alert == "INVALID TIMESTAMP":
+        action = "Fix timestamp formatting before SLA review"
     else:
         action = "Continue normal ticket follow-up"
 
