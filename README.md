@@ -30,7 +30,7 @@ python3 sla_checker.py
 
 ## Bug Report
 
-See [T001 Booking Calendar Report](bug_reports/T001-booking-calendar.md).
+See [T001 Booking Calendar Report](T001-booking-calendar.md).
 
 ## Data and Limitations
 
