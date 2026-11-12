@@ -41,6 +41,20 @@ response times and identifies tickets requiring attention.
 
 ## Skills Demonstrated
 
+
+## Customer Support Documentation
+
+### Customer Help Article
+[How to Find a Missing Appointment in Your Clinic Calendar](docs/help-article.md)
+
+A customer-facing troubleshooting guide written for nontechnical clinic staff, demonstrating clear communication, step-by-step guidance, and patient privacy awareness.
+
+### Platform Support SOP
+[View Platform Support Standard Operating Procedure](docs/platform-support-sop.md)
+
+Documents ticket triage, troubleshooting workflows, customer communication, engineering escalation, and support handoffs.
+
+
 - Support ticket triage and prioritization
 - First-response SLA monitoring
 - SLA breach detection
