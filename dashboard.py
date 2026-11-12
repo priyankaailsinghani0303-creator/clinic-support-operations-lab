@@ -111,3 +111,84 @@ with overview_tab:
 
 with queue_tab:
     st.dataframe(filtered_tickets, use_container_width=True, hide_index=True)
+    
+with sla_tab:
+    st.subheader("First-Response SLA Monitoring")
+    st.caption("Fictional ticket data. SLA targets are demonstration policies.")
+
+    policy = pd.read_csv(
+        Path(__file__).resolve().parent / "sla_policy.csv"
+    )
+    timestamps = pd.read_csv(
+        Path(__file__).resolve().parent / "ticket_timestamps.csv"
+    )
+
+    sla_data = filtered_tickets.merge(
+        policy[["priority", "first_response_minutes"]],
+        on="priority",
+        how="left"
+    ).merge(
+        timestamps[["ticket_id", "created_at", "first_responded_at"]],
+        on="ticket_id",
+        how="left"
+    )
+
+    created = pd.to_datetime(sla_data["created_at"], errors="coerce")
+    responded = pd.to_datetime(
+        sla_data["first_responded_at"], errors="coerce"
+    )
+
+    sla_data["response_minutes"] = (
+        responded - created
+    ).dt.total_seconds() / 60
+
+    def sla_status(row):
+        if pd.isna(row["first_response_minutes"]):
+            return "Policy Missing"
+        if pd.isna(row["response_minutes"]):
+            return "Response Not Recorded"
+        if row["response_minutes"] < 0:
+            return "Invalid Timestamp"
+        if row["response_minutes"] <= row["first_response_minutes"]:
+            return "Met"
+        return "Breached"
+
+    sla_data["SLA Status"] = sla_data.apply(sla_status, axis=1)
+
+    met = (sla_data["SLA Status"] == "Met").sum()
+    breached = (sla_data["SLA Status"] == "Breached").sum()
+    missing = (sla_data["SLA Status"] == "Response Not Recorded").sum()
+
+    c1, c2, c3 = st.columns(3)
+    c1.metric("SLA Met", int(met))
+    c2.metric("SLA Breached", int(breached))
+    c3.metric("Response Not Recorded", int(missing))
+
+    evaluated = met + breached
+    if evaluated:
+        st.metric("SLA Compliance", f"{met / evaluated:.0%}")
+
+    st.dataframe(
+        sla_data[
+            [
+                "ticket_id",
+                "issue_type",
+                "priority",
+                "first_response_minutes",
+                "response_minutes",
+                "SLA Status",
+            ]
+        ],
+        use_container_width=True,
+        hide_index=True,
+    )
+
+    if breached:
+        st.error(f"{breached} ticket(s) breached the first-response SLA.")
+
+    if missing:
+        st.warning(
+            f"{missing} ticket(s) have no recorded first response. "
+            "Verify the response history."
+        )
+
