@@ -41,23 +41,18 @@ The clinic reports missing reminders. The SOP covers notification triggers, deli
 ## Bug-Report Structure
 ## Support Playbook
 
-Explore the workflow by topic:
+| Section | Related SOP Sections | What It Covers |
+|---|---|---|
+| **1. Receive & Triage** | [§6 Communication](docs/platform-support-sop.md#6-customer-communication-standards) · [§7 Triage](docs/platform-support-sop.md#7-support-ticket-triage-flowchart) | Acknowledge, clarify scope and impact, set priority |
+| **2. Troubleshoot** | [§8 Booking/Calendar](docs/platform-support-sop.md#8-booking--calendar-troubleshooting) · [§9 Payments](docs/platform-support-sop.md#9-payment--pos-troubleshooting) · [§10 Messaging](docs/platform-support-sop.md#10-messaging--notification-troubleshooting) · [§11 Accounts](docs/platform-support-sop.md#11-account-access--settings-troubleshooting) | Initial checks for booking/calendar, payments, messaging and account access |
+| **3. Investigate & Escalate** | [§12 Bug Reports](docs/platform-support-sop.md#12-bug-reproduction--technical-documentation) · [§15 Escalation](docs/platform-support-sop.md#15-specialist-escalation-matrix) · [§3 Ownership](docs/platform-support-sop.md#3-roles-and-responsibilities) | Expected/actual behavior, reproduction steps, evidence, receiving team and owner |
+| **4. Guide & Educate** | [§13 Screen Sharing](docs/platform-support-sop.md#13-screen-share-support--customer-training) · [§16 Help Articles](docs/platform-support-sop.md#16-knowledge-base--help-article-management) | Explain steps simply, verify understanding and share verified guidance |
+| **5. Track & Review** | [§14 SLA Management](docs/platform-support-sop.md#14-support-ticket-documentation--sla-management) · [§16.4 Improvement](docs/platform-support-sop.md#164-continuous-improvement) | Response targets, unevaluable records, follow-ups and recurring issues |
+| **6. Hand Over** | [§17.1 Handoff](docs/platform-support-sop.md#171-end-of-shift-handoff) · [§17.2 Template](docs/platform-support-sop.md#172-end-of-shift-handoff-template) | Ticket ID, current status, owner, next action and promised update |
 
-| Area | What It Covers |
-|---|---|
-| **[1. Receive & Triage](docs/platform-support-sop.md#7-support-ticket-triage-flowchart)** | Clarify the issue, assess clinic impact and set priority |
-| **[2. Troubleshoot](docs/platform-support-sop.md#8-booking--calendar-troubleshooting)** | Booking/calendar checks, followed by payments, messaging and account access |
-| **[3. Investigate & Escalate](docs/platform-support-sop.md#12-bug-reproduction--technical-documentation)** | Expected versus actual behavior, reproduction steps and evidence |
-| **[4. Guide & Educate](docs/platform-support-sop.md#13-screen-share-support--customer-training)** | Screen-share preparation, clear explanations and customer practice |
-| **[5. Track & Review](docs/platform-support-sop.md#14-support-ticket-documentation--sla-management)** | First-response targets, unevaluable records and review triggers |
-| **[6. Hand Over](docs/platform-support-sop.md#17-end-of-shift-handoff--sop-version-control)** | Ticket status, ownership, next actions and outstanding follow-ups |
+## Full SOP
 
-### Full SOP
-
-[Read the complete Platform Support SOP →](docs/platform-support-sop.md)
-
-Includes detailed communication standards, troubleshooting procedures,
-routing, escalation, help-article management and shift preparation.
+[Read the complete Platform Support Standard Operating Procedure →](docs/platform-support-sop.md)
 
 *Independent portfolio demonstration using fictional scenarios.*
 The SOP documents how to capture:
