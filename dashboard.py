@@ -1,6 +1,11 @@
+
 import pandas as pd
 import streamlit as st
 from pathlib import Path
+
+# ---------------------------------------
+# PAGE CONFIGURATION
+# ---------------------------------------
 
 st.set_page_config(
     page_title="Clinic Support Dashboard",
@@ -9,17 +14,24 @@ st.set_page_config(
 )
 
 st.title("🏥 Clinic Support Operations Dashboard")
-st.caption("Portfolio demonstration using fictional clinic tickets")
+st.caption(
+    "Healthcare SaaS support portfolio | "
+    "Fictional clinic tickets and demonstration SLA policies"
+)
 
+BASE_DIR = Path(__file__).resolve().parent
+
+
+# ---------------------------------------
+# LOAD TICKETS
+# ---------------------------------------
 
 @st.cache_data
 def load_tickets():
-    csv_path = Path(__file__).resolve().parent / "tickets.csv"
-
     try:
-        tickets = pd.read_csv(csv_path)
+        tickets = pd.read_csv(BASE_DIR / "tickets.csv")
     except FileNotFoundError:
-        st.error(f"CSV file not found: {csv_path}")
+        st.error("tickets.csv was not found.")
         return pd.DataFrame()
 
     required_columns = {
@@ -30,15 +42,15 @@ def load_tickets():
         "status",
         "description",
     }
+
     missing = required_columns - set(tickets.columns)
+
     if missing:
-        st.error(f"Missing required columns: {sorted(missing)}")
+        st.error(f"Missing columns: {sorted(missing)}")
         return pd.DataFrame()
 
-    tickets["clinic"] = tickets["clinic"].astype(str).str.title()
-    tickets["issue_type"] = tickets["issue_type"].astype(str).str.title()
-    tickets["priority"] = tickets["priority"].astype(str).str.title()
-    tickets["status"] = tickets["status"].astype(str).str.title()
+    for column in ["clinic", "issue_type", "priority", "status"]:
+        tickets[column] = tickets[column].astype(str).str.title()
 
     return tickets
 
@@ -46,27 +58,37 @@ def load_tickets():
 tickets = load_tickets()
 
 if tickets.empty:
+    st.warning("No valid ticket data available.")
     st.stop()
 
-st.sidebar.header("Filters")
+
+# ---------------------------------------
+# SIDEBAR FILTERS
+# ---------------------------------------
+
+st.sidebar.header("Support Filters")
+
 selected_clinics = st.sidebar.multiselect(
     "Clinic",
-    options=sorted(tickets["clinic"].unique()),
+    sorted(tickets["clinic"].unique()),
     default=sorted(tickets["clinic"].unique()),
 )
+
 selected_priorities = st.sidebar.multiselect(
     "Priority",
-    options=sorted(tickets["priority"].unique()),
+    sorted(tickets["priority"].unique()),
     default=sorted(tickets["priority"].unique()),
 )
+
 selected_statuses = st.sidebar.multiselect(
     "Status",
-    options=sorted(tickets["status"].unique()),
+    sorted(tickets["status"].unique()),
     default=sorted(tickets["status"].unique()),
 )
+
 selected_issue_types = st.sidebar.multiselect(
     "Issue Type",
-    options=sorted(tickets["issue_type"].unique()),
+    sorted(tickets["issue_type"].unique()),
     default=sorted(tickets["issue_type"].unique()),
 )
 
@@ -77,101 +99,284 @@ filtered_tickets = tickets[
     & tickets["issue_type"].isin(selected_issue_types)
 ].copy()
 
+
+# ---------------------------------------
+# SUPPORT OVERVIEW METRICS
+# ---------------------------------------
+
 st.subheader("Support Overview")
 
 col1, col2, col3, col4 = st.columns(4)
-col1.metric("Total Tickets", len(filtered_tickets))
-col2.metric("Urgent Tickets", int((filtered_tickets["priority"] == "Urgent").sum()))
-col3.metric("Open Tickets", int((filtered_tickets["status"] == "Open").sum()))
-col4.metric(
-    "High Priority",
-    int((filtered_tickets["priority"].isin(["High", "Urgent"])) .sum()),
+
+col1.metric(
+    "Total Tickets",
+    len(filtered_tickets)
 )
 
-overview_tab, queue_tab = st.tabs(["Overview", "Ticket Queue"])
+col2.metric(
+    "Urgent Tickets",
+    int((filtered_tickets["priority"] == "Urgent").sum())
+)
+
+col3.metric(
+    "Open Tickets",
+    int((filtered_tickets["status"] == "Open").sum())
+)
+
+col4.metric(
+    "High Priority",
+    int(
+        filtered_tickets["priority"]
+        .isin(["High", "Urgent"])
+        .sum()
+    )
+)
+
+
+# ---------------------------------------
+# CREATE THREE TABS
+# ---------------------------------------
+
+overview_tab, queue_tab, sla_tab = st.tabs(
+    ["Overview", "Ticket Queue", "SLA Monitoring"]
+)
+
+
+# ---------------------------------------
+# TAB 1: OVERVIEW
+# ---------------------------------------
 
 with overview_tab:
+
+    st.subheader("Support Ticket Analytics")
+
     left_col, right_col = st.columns(2)
 
-    priority_counts = filtered_tickets["priority"].value_counts().reset_index()
-    priority_counts.columns = ["priority", "count"]
-    left_col.bar_chart(priority_counts.set_index("priority"), use_container_width=True)
+    with left_col:
+        st.write("Tickets by Priority")
 
-    status_counts = filtered_tickets["status"].value_counts().reset_index()
-    status_counts.columns = ["status", "count"]
-    right_col.bar_chart(status_counts.set_index("status"), use_container_width=True)
+        priority_counts = (
+            filtered_tickets["priority"]
+            .value_counts()
+        )
 
-    clinic_counts = filtered_tickets["clinic"].value_counts().reset_index()
-    clinic_counts.columns = ["clinic", "count"]
-    st.bar_chart(clinic_counts.set_index("clinic"), use_container_width=True)
+        st.bar_chart(priority_counts)
 
-    type_counts = filtered_tickets["issue_type"].value_counts().reset_index()
-    type_counts.columns = ["issue_type", "count"]
-    st.bar_chart(type_counts.set_index("issue_type"), use_container_width=True)
+    with right_col:
+        st.write("Tickets by Status")
+
+        status_counts = (
+            filtered_tickets["status"]
+            .value_counts()
+        )
+
+        st.bar_chart(status_counts)
+
+    st.write("Tickets by Clinic")
+
+    clinic_counts = (
+        filtered_tickets["clinic"]
+        .value_counts()
+    )
+
+    st.bar_chart(clinic_counts)
+
+    st.write("Tickets by Issue Type")
+
+    issue_counts = (
+        filtered_tickets["issue_type"]
+        .value_counts()
+    )
+
+    st.bar_chart(issue_counts)
+
+
+# ---------------------------------------
+# TAB 2: TICKET QUEUE
+# ---------------------------------------
 
 with queue_tab:
-    st.dataframe(filtered_tickets, use_container_width=True, hide_index=True)
-    
-with sla_tab:
-    st.subheader("First-Response SLA Monitoring")
-    st.caption("Fictional ticket data. SLA targets are demonstration policies.")
 
-    policy = pd.read_csv(
-        Path(__file__).resolve().parent / "sla_policy.csv"
+    st.subheader("Support Ticket Queue")
+
+    st.dataframe(
+        filtered_tickets,
+        use_container_width=True,
+        hide_index=True,
     )
-    timestamps = pd.read_csv(
-        Path(__file__).resolve().parent / "ticket_timestamps.csv"
+
+    st.download_button(
+        label="Download Filtered Tickets",
+        data=filtered_tickets.to_csv(index=False),
+        file_name="clinic_support_tickets.csv",
+        mime="text/csv",
     )
+
+
+# ---------------------------------------
+# TAB 3: SLA MONITORING
+# ---------------------------------------
+
+with sla_tab:
+
+    st.subheader("First-Response SLA Monitoring")
+
+    st.caption(
+        "Historical first-response SLA calculations "
+        "using fictional support tickets."
+    )
+
+    try:
+        policy = pd.read_csv(
+            BASE_DIR / "sla_policy.csv"
+        )
+
+        timestamps = pd.read_csv(
+            BASE_DIR / "ticket_timestamps.csv"
+        )
+
+    except FileNotFoundError as error:
+        st.error(f"Required SLA file missing: {error}")
+        st.stop()
+
+    required_policy = {
+        "priority",
+        "first_response_minutes",
+    }
+
+    required_timestamps = {
+        "ticket_id",
+        "created_at",
+        "first_responded_at",
+    }
+
+    if not required_policy.issubset(policy.columns):
+        st.error("SLA policy file has missing columns.")
+        st.stop()
+
+    if not required_timestamps.issubset(timestamps.columns):
+        st.error("Timestamp file has missing columns.")
+        st.stop()
+
+    # Merge tickets with SLA policies
 
     sla_data = filtered_tickets.merge(
-        policy[["priority", "first_response_minutes"]],
+        policy[
+            ["priority", "first_response_minutes"]
+        ],
         on="priority",
-        how="left"
-    ).merge(
-        timestamps[["ticket_id", "created_at", "first_responded_at"]],
-        on="ticket_id",
-        how="left"
+        how="left",
+        validate="many_to_one",
     )
 
-    created = pd.to_datetime(sla_data["created_at"], errors="coerce")
+    # Merge ticket response timestamps
+
+    sla_data = sla_data.merge(
+        timestamps[
+            [
+                "ticket_id",
+                "created_at",
+                "first_responded_at",
+            ]
+        ],
+        on="ticket_id",
+        how="left",
+        validate="one_to_one",
+    )
+
+    # Calculate response times
+
+    created = pd.to_datetime(
+        sla_data["created_at"],
+        errors="coerce",
+        utc=True,
+    )
+
     responded = pd.to_datetime(
-        sla_data["first_responded_at"], errors="coerce"
+        sla_data["first_responded_at"],
+        errors="coerce",
+        utc=True,
     )
 
     sla_data["response_minutes"] = (
         responded - created
     ).dt.total_seconds() / 60
 
-    def sla_status(row):
+    sla_data["first_response_minutes"] = pd.to_numeric(
+        sla_data["first_response_minutes"],
+        errors="coerce",
+    )
+
+    # Classify SLA results
+
+    def calculate_sla_status(row):
+
         if pd.isna(row["first_response_minutes"]):
             return "Policy Missing"
+
+        if pd.isna(row["created_at"]):
+            return "Timestamp Missing"
+
         if pd.isna(row["response_minutes"]):
             return "Response Not Recorded"
+
         if row["response_minutes"] < 0:
             return "Invalid Timestamp"
+
         if row["response_minutes"] <= row["first_response_minutes"]:
             return "Met"
+
         return "Breached"
 
-    sla_data["SLA Status"] = sla_data.apply(sla_status, axis=1)
+    sla_data["SLA Status"] = sla_data.apply(
+        calculate_sla_status,
+        axis=1,
+    )
 
-    met = (sla_data["SLA Status"] == "Met").sum()
-    breached = (sla_data["SLA Status"] == "Breached").sum()
-    missing = (sla_data["SLA Status"] == "Response Not Recorded").sum()
+    # SLA metrics
+
+    met = int(
+        (sla_data["SLA Status"] == "Met").sum()
+    )
+
+    breached = int(
+        (sla_data["SLA Status"] == "Breached").sum()
+    )
+
+    missing = int(
+        (
+            sla_data["SLA Status"]
+            == "Response Not Recorded"
+        ).sum()
+    )
 
     c1, c2, c3 = st.columns(3)
-    c1.metric("SLA Met", int(met))
-    c2.metric("SLA Breached", int(breached))
-    c3.metric("Response Not Recorded", int(missing))
+
+    c1.metric("SLA Met", met)
+    c2.metric("SLA Breached", breached)
+    c3.metric("Response Not Recorded", missing)
 
     evaluated = met + breached
-    if evaluated:
-        st.metric("SLA Compliance", f"{met / evaluated:.0%}")
+
+    if evaluated > 0:
+        compliance = met / evaluated * 100
+
+        st.metric(
+            "First-Response SLA Compliance",
+            f"{compliance:.1f}%"
+        )
+    else:
+        st.info("No completed responses available for SLA evaluation.")
+
+    # SLA ticket table
+
+    st.subheader("Ticket SLA Details")
 
     st.dataframe(
         sla_data[
             [
                 "ticket_id",
+                "clinic",
                 "issue_type",
                 "priority",
                 "first_response_minutes",
@@ -183,12 +388,72 @@ with sla_tab:
         hide_index=True,
     )
 
-    if breached:
-        st.error(f"{breached} ticket(s) breached the first-response SLA.")
+    # SLA status chart
 
-    if missing:
-        st.warning(
-            f"{missing} ticket(s) have no recorded first response. "
-            "Verify the response history."
+    st.subheader("SLA Status Distribution")
+
+    sla_counts = (
+        sla_data["SLA Status"]
+        .value_counts()
+    )
+
+    st.bar_chart(sla_counts)
+
+    # Escalation alerts
+
+    st.subheader("Support Escalation Alerts")
+
+    if breached > 0:
+        st.error(
+            f"{breached} ticket(s) breached "
+            "their first-response SLA. "
+            "Review and escalate as needed."
         )
+
+    if missing > 0:
+        st.warning(
+            f"{missing} ticket(s) have no recorded "
+            "first response. Verify the response history."
+        )
+
+    invalid_count = int(
+        sla_data["SLA Status"]
+        .isin(["Invalid Timestamp", "Timestamp Missing", "Policy Missing"])
+        .sum()
+    )
+
+    if invalid_count > 0:
+        st.warning(
+            f"{invalid_count} ticket(s) need "
+            "SLA data or policy review."
+        )
+
+    if breached == 0 and missing == 0 and invalid_count == 0:
+        st.success(
+            "No SLA breaches or missing response records "
+            "in the selected tickets."
+        )
+
+    # Export SLA report
+
+    st.download_button(
+        label="Download SLA Report",
+        data=sla_data.to_csv(index=False),
+        file_name="clinic_sla_report.csv",
+        mime="text/csv",
+    )
+
+
+# ---------------------------------------
+# FOOTER
+# ---------------------------------------
+
+st.divider()
+
+st.caption(
+    "Clinic Support Operations Lab | "
+    "Portfolio demonstration | "
+    "All clinics, tickets and SLA targets are fictional. "
+    "Not connected to a live healthcare platform."
+)
 
