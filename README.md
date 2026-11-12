@@ -1,38 +1,74 @@
 # Clinic Support Operations Lab
 
-**Healthcare SaaS support portfolio: booking, payments, messaging, and clear clinic communication.**
+Support operations portfolio for a healthcare SaaS platform: booking, calendar, payments, messaging, and account settings—for busy clinic staff who need clear, practical help.
 
-A small support operations demo showing how I organize clinic requests, review first-response SLAs, suggest team handoffs, and explain troubleshooting steps to nontechnical staff.
+**My approach:** Understand the issue, guide initial troubleshooting, keep the clinic informed, and escalate with useful context.
 
-## Start Here
+## What’s Inside
 
-| Work sample | What it demonstrates |
-| --- | --- |
-| [Customer help article](docs/help-article.md) | Clear, step-by-step guidance for a missing appointment |
-| [Support SOP](docs/platform-support-sop.md) | Triage, troubleshooting, customer updates, bug-report requirements, and escalation |
-| [Dashboard source](dashboard.py) | Filterable ticket queue, SLA reporting, team routing, and an interactive risk simulation |
+| Work Sample | Skill Demonstrated |
+| :--- | :--- |
+| **[Customer Help Article](docs/help-article.md)** — Missing Appointment | Clear troubleshooting guidance for nontechnical front-desk staff |
+| **[Support SOP](docs/platform-support-sop.md)** — Triage → Troubleshoot → Update → Escalate | Structured investigations, customer communication, and handoff procedures |
+| **[Dashboard Code](dashboard.py)** — Queue, SLAs, Routing | First-response tracking, breach identification, and suggested team ownership |
 
-## Three Clinic Scenarios
+## Three Fictional Clinic Scenarios
 
-| Ticket | Issue | Priority | Sample first-response result |
-| --- | --- | --- | --- |
-| T001 | Booking missing from calendar | Urgent | 10 min / 15 min target — met |
-| T002 | Card payments failing | High | 50 min / 30 min target — breached |
-| T003 | Appointment reminders not delivered | Medium | Timestamps missing — verify records |
+### T001 — Booking Missing From Calendar · Urgent
 
-**Next actions:** continue booking follow-up, flag the payment response breach, and verify the messaging ticket's history.
+The clinic cannot locate an appointment. The help article guides staff through date, calendar-filter, provider, and booking-status checks.
 
-[View sample tickets](tickets.csv) · [SLA checker](sla_checker.py) · [Routing script](ticket_router.py)
+> First response: **10 min / 15 min target — Met**
+>
+> Next action: Continue troubleshooting and confirm the appointment’s status. Meeting the response target does not mean the issue is resolved.
 
-## Run the Dashboard
+### T002 — Card Payments Failing · High
 
-Requires Python 3.10+. From the downloaded or cloned repository:
+The clinic reports being unable to process payments. The SOP outlines transaction-status checks, information collection, customer updates, and escalation criteria.
+
+> First response: **50 min / 30 min target — Breached**
+>
+> Recommended action: Flag the breach, update the clinic, and escalate with investigation details.
+
+### T003 — Appointment Reminders Not Delivered · Medium
+
+The clinic reports missing reminders. The SOP covers notification triggers, delivery status, and whether multiple recipients are affected.
+
+> **Timestamp records missing — verify history before determining SLA status.**
+
+## Bug-Report Structure
+
+The SOP documents how to capture:
+
+- Expected versus actual behavior.
+- Environment and steps to reproduce.
+- Reproduction outcome and clinic impact.
+- Sanitized screenshots, timestamps, or error messages when available.
+- Troubleshooting already attempted.
+- Next action and receiving team.
+
+## Dashboard Features
+
+- Filter tickets by clinic, priority, status, and issue type.
+- Compare recorded first-response times against configurable SLA targets.
+- Flag response breaches and incomplete timestamp records.
+- Suggest support teams using issue-based routing rules.
+- Simulate approaching response deadlines with an elapsed-time slider.
+- Download ticket, SLA, routing, and simulation reports as CSV files.
+
+## Run Locally
+
+Requires **Python 3.10 or later**. Download or clone this repository, open its folder in a terminal, and run:
 
 ```bash
 python3 -m pip install -r requirements.txt
 python3 -m streamlit run dashboard.py
 ```
 
-**Built with:** Python, Streamlit, pandas, CSV, and Markdown.
+Open the local URL displayed in the terminal.
 
-*Independent portfolio demonstration using fictional data—not Health Hue Hub software or verified vendor instructions. SLA calculations cover first responses using elapsed time; risk alerts are hypothetical. No real patient data is included.*
+**Tools:** Python · Streamlit · pandas · CSV · Markdown
+
+---
+
+*Independent portfolio demonstration using fictional clinics, tickets, and SLA targets. No real patient information is included. SLA reporting evaluates first responses using elapsed time; risk alerts are hypothetical simulations. Bug reproduction and screen sharing are documented procedures, not completed demonstrations. Not affiliated with Health Hue Digital.*
