@@ -1,7 +1,9 @@
 
+from pathlib import Path
+
 import pandas as pd
 import streamlit as st
-from pathlib import Path
+
 
 # ---------------------------------------
 # PAGE CONFIGURATION
@@ -50,7 +52,9 @@ def load_tickets():
         return pd.DataFrame()
 
     for column in ["clinic", "issue_type", "priority", "status"]:
-        tickets[column] = tickets[column].astype(str).str.title()
+        tickets[column] = (
+            tickets[column].astype(str).str.strip().str.title()
+        )
 
     return tickets
 
@@ -70,25 +74,25 @@ st.sidebar.header("Support Filters")
 
 selected_clinics = st.sidebar.multiselect(
     "Clinic",
-    sorted(tickets["clinic"].unique()),
+    options=sorted(tickets["clinic"].unique()),
     default=sorted(tickets["clinic"].unique()),
 )
 
 selected_priorities = st.sidebar.multiselect(
     "Priority",
-    sorted(tickets["priority"].unique()),
+    options=sorted(tickets["priority"].unique()),
     default=sorted(tickets["priority"].unique()),
 )
 
 selected_statuses = st.sidebar.multiselect(
     "Status",
-    sorted(tickets["status"].unique()),
+    options=sorted(tickets["status"].unique()),
     default=sorted(tickets["status"].unique()),
 )
 
 selected_issue_types = st.sidebar.multiselect(
     "Issue Type",
-    sorted(tickets["issue_type"].unique()),
+    options=sorted(tickets["issue_type"].unique()),
     default=sorted(tickets["issue_type"].unique()),
 )
 
@@ -108,19 +112,16 @@ st.subheader("Support Overview")
 
 col1, col2, col3, col4 = st.columns(4)
 
-col1.metric(
-    "Total Tickets",
-    len(filtered_tickets)
-)
+col1.metric("Total Tickets", len(filtered_tickets))
 
 col2.metric(
     "Urgent Tickets",
-    int((filtered_tickets["priority"] == "Urgent").sum())
+    int((filtered_tickets["priority"] == "Urgent").sum()),
 )
 
 col3.metric(
     "Open Tickets",
-    int((filtered_tickets["status"] == "Open").sum())
+    int((filtered_tickets["status"] == "Open").sum()),
 )
 
 col4.metric(
@@ -129,7 +130,7 @@ col4.metric(
         filtered_tickets["priority"]
         .isin(["High", "Urgent"])
         .sum()
-    )
+    ),
 )
 
 
@@ -147,48 +148,31 @@ overview_tab, queue_tab, sla_tab = st.tabs(
 # ---------------------------------------
 
 with overview_tab:
-
     st.subheader("Support Ticket Analytics")
 
     left_col, right_col = st.columns(2)
 
     with left_col:
         st.write("Tickets by Priority")
-
-        priority_counts = (
-            filtered_tickets["priority"]
-            .value_counts()
+        st.bar_chart(
+            filtered_tickets["priority"].value_counts()
         )
-
-        st.bar_chart(priority_counts)
 
     with right_col:
         st.write("Tickets by Status")
-
-        status_counts = (
-            filtered_tickets["status"]
-            .value_counts()
+        st.bar_chart(
+            filtered_tickets["status"].value_counts()
         )
 
-        st.bar_chart(status_counts)
-
     st.write("Tickets by Clinic")
-
-    clinic_counts = (
-        filtered_tickets["clinic"]
-        .value_counts()
+    st.bar_chart(
+        filtered_tickets["clinic"].value_counts()
     )
-
-    st.bar_chart(clinic_counts)
 
     st.write("Tickets by Issue Type")
-
-    issue_counts = (
-        filtered_tickets["issue_type"]
-        .value_counts()
+    st.bar_chart(
+        filtered_tickets["issue_type"].value_counts()
     )
-
-    st.bar_chart(issue_counts)
 
 
 # ---------------------------------------
@@ -196,7 +180,6 @@ with overview_tab:
 # ---------------------------------------
 
 with queue_tab:
-
     st.subheader("Support Ticket Queue")
 
     st.dataframe(
@@ -218,7 +201,6 @@ with queue_tab:
 # ---------------------------------------
 
 with sla_tab:
-
     st.subheader("First-Response SLA Monitoring")
 
     st.caption(
@@ -258,8 +240,21 @@ with sla_tab:
         st.error("Timestamp file has missing columns.")
         st.stop()
 
-    # Merge tickets with SLA policies
+    # Normalize priority values
+    policy["priority"] = (
+        policy["priority"].astype(str).str.strip().str.title()
+    )
 
+    # Check for duplicate keys before merging
+    if policy["priority"].duplicated().any():
+        st.error("Duplicate priorities found in sla_policy.csv.")
+        st.stop()
+
+    if timestamps["ticket_id"].duplicated().any():
+        st.error("Duplicate ticket IDs found in ticket_timestamps.csv.")
+        st.stop()
+
+    # Merge tickets with SLA policies
     sla_data = filtered_tickets.merge(
         policy[
             ["priority", "first_response_minutes"]
@@ -269,8 +264,7 @@ with sla_tab:
         validate="many_to_one",
     )
 
-    # Merge ticket response timestamps
-
+    # Merge response timestamps
     sla_data = sla_data.merge(
         timestamps[
             [
@@ -284,8 +278,7 @@ with sla_tab:
         validate="one_to_one",
     )
 
-    # Calculate response times
-
+    # Convert timestamps to datetime
     created = pd.to_datetime(
         sla_data["created_at"],
         errors="coerce",
@@ -298,6 +291,7 @@ with sla_tab:
         utc=True,
     )
 
+    # Calculate first-response time
     sla_data["response_minutes"] = (
         responded - created
     ).dt.total_seconds() / 60
@@ -307,18 +301,25 @@ with sla_tab:
         errors="coerce",
     )
 
-    # Classify SLA results
+    # ---------------------------------------
+    # SLA STATUS CLASSIFICATION
+    # ---------------------------------------
 
     def calculate_sla_status(row):
-
         if pd.isna(row["first_response_minutes"]):
             return "Policy Missing"
 
+        # No timestamp record or creation time
         if pd.isna(row["created_at"]):
-            return "Timestamp Missing"
-
-        if pd.isna(row["response_minutes"]):
             return "Response Not Recorded"
+
+        # No first-response timestamp
+        if pd.isna(row["first_responded_at"]):
+            return "Response Not Recorded"
+
+        # Invalid timestamp formatting
+        if pd.isna(row["response_minutes"]):
+            return "Invalid Timestamp"
 
         if row["response_minutes"] < 0:
             return "Invalid Timestamp"
@@ -333,7 +334,9 @@ with sla_tab:
         axis=1,
     )
 
-    # SLA metrics
+    # ---------------------------------------
+    # SLA METRICS
+    # ---------------------------------------
 
     met = int(
         (sla_data["SLA Status"] == "Met").sum()
@@ -350,6 +353,13 @@ with sla_tab:
         ).sum()
     )
 
+    invalid = int(
+        (
+            sla_data["SLA Status"]
+            == "Invalid Timestamp"
+        ).sum()
+    )
+
     c1, c2, c3 = st.columns(3)
 
     c1.metric("SLA Met", met)
@@ -363,12 +373,17 @@ with sla_tab:
 
         st.metric(
             "First-Response SLA Compliance",
-            f"{compliance:.1f}%"
+            f"{compliance:.1f}%",
         )
     else:
-        st.info("No completed responses available for SLA evaluation.")
+        st.info(
+            "No completed responses available "
+            "for SLA evaluation."
+        )
 
-    # SLA ticket table
+    # ---------------------------------------
+    # SLA DETAILS TABLE
+    # ---------------------------------------
 
     st.subheader("Ticket SLA Details")
 
@@ -388,18 +403,19 @@ with sla_tab:
         hide_index=True,
     )
 
-    # SLA status chart
+    # ---------------------------------------
+    # SLA STATUS CHART
+    # ---------------------------------------
 
     st.subheader("SLA Status Distribution")
 
-    sla_counts = (
-        sla_data["SLA Status"]
-        .value_counts()
+    st.bar_chart(
+        sla_data["SLA Status"].value_counts()
     )
 
-    st.bar_chart(sla_counts)
-
-    # Escalation alerts
+    # ---------------------------------------
+    # ESCALATION ALERTS
+    # ---------------------------------------
 
     st.subheader("Support Escalation Alerts")
 
@@ -416,25 +432,39 @@ with sla_tab:
             "first response. Verify the response history."
         )
 
-    invalid_count = int(
-        sla_data["SLA Status"]
-        .isin(["Invalid Timestamp", "Timestamp Missing", "Policy Missing"])
-        .sum()
+    if invalid > 0:
+        st.warning(
+            f"{invalid} ticket(s) contain "
+            "invalid response timestamps."
+        )
+
+    policy_missing = int(
+        (
+            sla_data["SLA Status"]
+            == "Policy Missing"
+        ).sum()
     )
 
-    if invalid_count > 0:
+    if policy_missing > 0:
         st.warning(
-            f"{invalid_count} ticket(s) need "
-            "SLA data or policy review."
+            f"{policy_missing} ticket(s) have "
+            "no matching SLA policy."
         )
 
-    if breached == 0 and missing == 0 and invalid_count == 0:
+    if (
+        breached == 0
+        and missing == 0
+        and invalid == 0
+        and policy_missing == 0
+    ):
         st.success(
-            "No SLA breaches or missing response records "
-            "in the selected tickets."
+            "No SLA breaches or missing response "
+            "records in the selected tickets."
         )
 
-    # Export SLA report
+    # ---------------------------------------
+    # DOWNLOAD SLA REPORT
+    # ---------------------------------------
 
     st.download_button(
         label="Download SLA Report",
@@ -453,7 +483,6 @@ st.divider()
 st.caption(
     "Clinic Support Operations Lab | "
     "Portfolio demonstration | "
-    "All clinics, tickets and SLA targets are fictional. "
+    "All clinics, tickets, and SLA targets are fictional. "
     "Not connected to a live healthcare platform."
 )
-
