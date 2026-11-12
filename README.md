@@ -44,7 +44,7 @@ response times and identifies tickets requiring attention.
 ### Customer Help Article
 [How to Find a Missing Appointment in Your Clinic Calendar](docs/help-article.md)
 
-A customer-facing troubleshooting guide written for nontechnical clinic staff, demonstrating clear communication, step-by-step guidance, and patient privacy awareness.
+A customer-facing troubleshooting guide written for nontechnical clinic staff, demonstrating clear communication, step-by-step guidance, and HIPPAA compliance
 
 ### Platform Support SOP
 [View Platform Support Standard Operating Procedure](docs/platform-support-sop.md)
