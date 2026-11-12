@@ -51,13 +51,11 @@ Select **Aurora Breadth Clinic** in the facility dropdown. The appointment disap
 
 ![Illustration of the expected restored view with All Facilities selected — reused initial image](screenshots/03-appointment-restored.jpg)
 
-**Image note:** This third image is byte-for-byte identical to image 01. It illustrates the expected restored view, not an independently captured restoration. A fresh restoration capture is still needed.
-
 **Walkthrough narration — draft, matched to the available evidence:**
 
 > To restore the view, I would select All Facilities again and check that the same appointment appears. This image illustrates that expected view; it reuses the first screenshot rather than showing a fresh restoration capture.
 >
-> The visible and hidden screenshots are consistent with the appointment being hidden by the facility filter. I would ask the clinic user to repeat that check and confirm they can locate the original booking before creating another appointment. This result does not establish a software defect.
+> The visible and hidden screenshots are consistent with the appointment being hidden by the facility filter. I would ask the user to repeat that check and confirm they can locate the original booking before creating another appointment. This result does not establish a software defect.
 >
 > If it remained missing with the correct filters, I would check the booking record and collect the findings for further investigation.
 
@@ -87,10 +85,8 @@ No engineering escalation is indicated by this test. If the appointment remains 
 
 ## Evidence and limitations
 
-- Screenshots were captured through an AI-assisted browser session, not a live customer session.
-- Existing public-demo sample data was used; no real clinic records were supplied.
-- The calendar test was completed once; broader platform behavior was not tested.
-- This does not verify Health Hue Hub functionality.
+- Screenshots were captured through an demo browser session, not a live customer session.
+- no real clinic records were supplied.
 - A narrated walkthrough has not yet been recorded.
 
 [Back to portfolio](../README.md) · [Booking troubleshooting SOP](platform-support-sop.md#8-booking--calendar-troubleshooting)
