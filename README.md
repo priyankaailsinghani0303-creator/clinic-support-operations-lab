@@ -1,102 +1,128 @@
 # Clinic Support Operations Lab
 
-Support operations portfolio for a healthcare SaaS platform: booking, calendar, payments, messaging, and account settings—for busy clinic staff who need clear, practical help.
+A healthcare SaaS support portfolio showing how I approach booking, calendar, payment, messaging, and account-access issues for busy clinic teams.
 
-**My approach:** Understand the issue, guide initial troubleshooting, keep the clinic informed, and escalate with useful context.
+I am a medical student with approximately two years of hospital administration experience, including appointments, patient calls, complaints, billing queries, and hospital software. This project applies that experience to platform support.
 
-### [Open Live Dashboard →](https://clinic-support-operations-lab-qzcgaprlcsp8dvyn7ql4rb.streamlit.app/)
+**My approach:** Understand the impact, explain the next step clearly, investigate systematically, and keep ownership through escalation.
 
-## What’s Inside
+### [Open the Live Dashboard →](https://clinic-support-operations-lab-qzcgaprlcsp8dvyn7ql4rb.streamlit.app/)
 
-| Work Sample | Skill Demonstrated |
-| :--- | :--- |
-| **[Interactive Dashboard](https://clinic-support-operations-lab-qzcgaprlcsp8dvyn7ql4rb.streamlit.app/)** | Ticket organization, first-response SLA monitoring, team routing, and risk simulation |
-| **[Customer Help Article](docs/help-article.md)** — Missing Appointment | Clear troubleshooting guidance for nontechnical front-desk staff |
-| **[Support SOP](docs/platform-support-sop.md)** — Triage → Troubleshoot → Update → Escalate | Structured investigations, customer communication, and handoff procedures |
+No local installation required to review the dashboard.
 
-## Three Fictional Clinic Scenarios
+> Independent portfolio project using fictional clinics, tickets, and SLA targets. No real patient information is included. Not affiliated with Health Hue Digital.
 
-### T001 — Booking Missing From Calendar · Urgent
+## Start Here
 
-The clinic cannot locate an appointment. The help article guides staff through date, calendar-filter, provider, and booking-status checks.
+| Work Sample | What to Look For |
+|---|---|
+| **[Live Support Dashboard](https://clinic-support-operations-lab-qzcgaprlcsp8dvyn7ql4rb.streamlit.app/)** | Ticket filtering, first-response SLA results, incomplete records, suggested routing, and simulated risk alerts |
+| **[Customer Help Article: Missing Appointment](docs/help-article.md)** | Simple troubleshooting steps for nontechnical clinic staff, with clear guidance on when to contact support |
+| **[Platform Support SOP](docs/platform-support-sop.md)** | Triage, troubleshooting, customer updates, bug-report requirements, escalation, screen-sharing procedures, and shift handoffs |
 
-> First response: **10 min / 15 min target — Met**
->
-> Next action: Continue troubleshooting and confirm the appointment’s status. Meeting the response target does not mean the issue is resolved.
+## Three Clinic Support Scenarios
 
-### T002 — Card Payments Failing · High
+The sample queue contains three open tickets. Priorities are fictional assumptions that would require confirmation of actual clinic impact.
 
-The clinic reports being unable to process payments. The SOP outlines transaction-status checks, information collection, customer updates, and escalation criteria.
+| Ticket | Reported Issue | Investigation Focus | Sample First-Response Result |
+|---|---|---|---|
+| **T001 · Urgent** | Online appointments missing from the calendar | Confirm booking status, date, provider, and calendar filters before creating another appointment | **Met:** 10 minutes against a 15-minute target |
+| **T002 · High** | Clinic staff cannot process card payments | Check transaction status, error details, and scope; distinguish payment discrepancies from suspected software defects | **Breached:** 50 minutes against a 30-minute target |
+| **T003 · Medium** | Appointment reminders not delivered | Identify SMS/email scope, expected send time, notification triggers, and delivery status | **Cannot evaluate:** timestamp history is missing |
 
-> First response: **50 min / 30 min target — Breached**
->
-> Recommended action: Flag the breach, update the clinic, and escalate with investigation details.
+**How to interpret the results:** Two tickets can be evaluated; one met its first-response target. The sample compliance rate is **50% across those two tickets**. T003 is excluded because its history is incomplete.
 
-### T003 — Appointment Reminders Not Delivered · Medium
+Meeting a response target does not mean the issue has been resolved.
 
-The clinic reports missing reminders. The SOP covers notification triggers, delivery status, and whether multiple recipients are affected.
+## My Support Workflow
 
-> **Timestamp records missing — verify history before determining SLA status.**
-
-## Bug-Report Structure
-## Support Playbook
-
-| Section | Related SOP Sections | What It Covers |
+| Step | Skill Demonstrated | Supporting SOP Sections |
 |---|---|---|
-| **1. Receive & Triage** | [§6 Communication](docs/platform-support-sop.md#6-customer-communication-standards) · [§7 Triage](docs/platform-support-sop.md#7-support-ticket-triage-flowchart) | Acknowledge, clarify scope and impact, set priority |
-| **2. Troubleshoot** | [§8 Booking/Calendar](docs/platform-support-sop.md#8-booking--calendar-troubleshooting) · [§9 Payments](docs/platform-support-sop.md#9-payment--pos-troubleshooting) · [§10 Messaging](docs/platform-support-sop.md#10-messaging--notification-troubleshooting) · [§11 Accounts](docs/platform-support-sop.md#11-account-access--settings-troubleshooting) | Initial checks for booking/calendar, payments, messaging and account access |
-| **3. Investigate & Escalate** | [§12 Bug Reports](docs/platform-support-sop.md#12-bug-reproduction--technical-documentation) · [§15 Escalation](docs/platform-support-sop.md#15-specialist-escalation-matrix) · [§3 Ownership](docs/platform-support-sop.md#3-roles-and-responsibilities) | Expected/actual behavior, reproduction steps, evidence, receiving team and owner |
-| **4. Guide & Educate** | [§13 Screen Sharing](docs/platform-support-sop.md#13-screen-share-support--customer-training) · [§16 Help Articles](docs/platform-support-sop.md#16-knowledge-base--help-article-management) | Explain steps simply, verify understanding and share verified guidance |
-| **5. Track & Review** | [§14 SLA Management](docs/platform-support-sop.md#14-support-ticket-documentation--sla-management) · [§16.4 Improvement](docs/platform-support-sop.md#164-continuous-improvement) | Response targets, unevaluable records, follow-ups and recurring issues |
-| **6. Hand Over** | [§17.1 Handoff](docs/platform-support-sop.md#171-end-of-shift-handoff) · [§17.2 Template](docs/platform-support-sop.md#172-end-of-shift-handoff-template) | Ticket ID, current status, owner, next action and promised update |
+| **1. Receive & Triage** | Acknowledge the request, clarify impact, and assign priority | [§6 Customer Communication](docs/platform-support-sop.md#6-customer-communication-standards) · [§7 Ticket Triage](docs/platform-support-sop.md#7-support-ticket-triage-flowchart) |
+| **2. Troubleshoot** | Guide focused checks and document findings | [§8 Booking & Calendar](docs/platform-support-sop.md#8-booking--calendar-troubleshooting) · [§9 Payments](docs/platform-support-sop.md#9-payment--pos-troubleshooting) · [§10 Messaging](docs/platform-support-sop.md#10-messaging--notification-troubleshooting) · [§11 Account Access](docs/platform-support-sop.md#11-account-access--settings-troubleshooting) |
+| **3. Investigate & Escalate** | Document reproduction attempts, evidence, and a clear escalation | [§12 Bug Reproduction & Documentation](docs/platform-support-sop.md#12-bug-reproduction--technical-documentation) · [§15 Specialist Escalation](docs/platform-support-sop.md#15-specialist-escalation-matrix) · [§3 Ownership](docs/platform-support-sop.md#3-roles-and-responsibilities) |
+| **4. Guide & Educate** | Explain features clearly and help clinic staff repeat the steps independently | [§13 Screen Sharing & Training](docs/platform-support-sop.md#13-screen-share-support--customer-training) · [§16 Help Article Management](docs/platform-support-sop.md#16-knowledge-base--help-article-management) |
+| **5. Track & Review** | Monitor response targets, incomplete records, follow-ups, and recurring issues | [§14 Ticket Documentation & SLA Management](docs/platform-support-sop.md#14-support-ticket-documentation--sla-management) · [§16.4 Continuous Improvement](docs/platform-support-sop.md#164-continuous-improvement) |
+| **6. Hand Over** | Record ticket status, ownership, next actions, and outstanding customer updates | [§17.1 End-of-Shift Handoff](docs/platform-support-sop.md#171-end-of-shift-handoff) · [§17.2 Handoff Template](docs/platform-support-sop.md#172-end-of-shift-handoff-template) |
 
-Full SOP
-[Read the complete Platform Support Standard Operating Procedure →](docs/platform-support-sop.md)
-*Independent portfolio demonstration using fictional scenarios.*
+[Read the complete Platform Support SOP →](docs/platform-support-sop.md)
 
-The SOP documents how to capture:
+## Customer Communication Example
 
-- Expected versus actual behavior.
-- Environment and steps to reproduce.
-- Reproduction outcome and clinic impact.
-- Sanitized screenshots, timestamps, or error messages when available.
-- Troubleshooting already attempted.
-- Next action and receiving team.
+**Illustrative first reply for T001 — not a sent customer message:**
+
+> Thanks for flagging this. I understand a missing appointment can disrupt the front desk. Could you confirm the appointment date, selected provider, and whether you received a booking confirmation? First, please check that the calendar shows the correct date and provider. Avoid creating another booking until we confirm whether the original exists. Please leave patient details out of your reply.
+
+The aim is to acknowledge the disruption, ask focused questions, and give a practical first step.
+
+## Escalation and Ownership
+
+The SOP defines what an engineering handoff should contain:
+
+- Clinic impact and affected workflow
+- Expected versus actual behavior
+- Environment and steps to reproduce
+- Whether reproduction succeeded
+- Sanitized error messages, screenshots, or timestamps when available
+- Troubleshooting already attempted
+- Receiving team, accountable owner, and next action
+
+Routing suggestions do not count as accepted assignments. The support owner continues customer communication until a receiving owner accepts the handoff.
 
 ## Explore the Dashboard
 
-1. **Overview:** Review ticket counts, priorities, and sample SLA performance.
-2. **Ticket Queue:** Filter requests by clinic, priority, status, and issue type.
-3. **SLA Monitoring:** Review response-target breaches and incomplete records.
-4. **Ticket Routing:** Inspect suggested support-team assignments.
-5. **SLA Risk Alerts:** Adjust hypothetical elapsed time to explore warning and breach thresholds.
+| View | What It Shows |
+|---|---|
+| **Overview** | Sample ticket counts, priorities, and first-response SLA performance |
+| **Ticket Queue** | Filters for clinic, priority, status, and issue type |
+| **SLA Monitoring** | Confirmed response-target breaches and records that cannot be evaluated |
+| **Ticket Routing** | Suggested initial support-team assignments |
+| **SLA Risk Alerts** | Hypothetical elapsed-time scenarios showing warning and breach thresholds |
 
 Downloadable CSV reports support further review and handoffs.
 
-## Run Locally
+## Scope of This Demonstration
 
-Requires **Python 3.10 or later**. Download or clone this repository, open its folder in a terminal, and run:
+| Implemented or Written | Documented Procedure / Future Evidence |
+|---|---|
+| Interactive dashboard and fictional ticket queue | Completed bug reproduction with captured evidence |
+| First-response SLA calculations and missing-data handling | Measured resolution times |
+| Suggested initial team routing | Accepted assignments and completed handoffs |
+| Customer-facing help article | Recorded screen-share walkthrough |
+| Support SOP with example customer replies | Real ticket, chat, or call outcomes |
+
+The help article provides generic troubleshooting guidance. Platform-specific instructions have not been verified against Health Hue Hub.
+
+The SOP includes privacy-conscious practices such as requesting only necessary information, sanitizing evidence, and avoiding passwords or full payment-card details.
+
+## Technical Notes
+
+**Tools:** Python · Streamlit · pandas · CSV · Markdown
+
+- SLA targets are defined in [`sla_policy.csv`](sla_policy.csv).
+- The dashboard, SLA checker, and ticket router use [`support_rules.py`](support_rules.py).
+- First-response calculations use elapsed time in UTC, without business-hour pauses.
+- Risk alerts are hypothetical simulations.
+- Resolution targets are reference values; resolution performance is not calculated.
+- [`tickets.csv`](tickets.csv) is the active sample queue.
+- `tickets_backup.csv` is an inactive historical snapshot.
+
+<details>
+<summary>Run locally and verify shared rules</summary>
+
+Requires **Python 3.10 or later**.
+
+Download or clone this repository, open its folder in a terminal, and run:
 
 ```bash
 python3 -m pip install -r requirements.txt
 python3 -m streamlit run dashboard.py
 ```
 
-**Tools:** Python · Streamlit · pandas · CSV · Markdown
+Run the shared-rule checks:
 
----
+```bash
+python3 -m unittest discover -s tests -v
+```
 
-*Independent portfolio demonstration using fictional clinics, tickets, and SLA targets. No real patient information is included. SLA reporting evaluates first responses using elapsed time; risk alerts are hypothetical simulations. Bug reproduction and screen sharing are documented procedures, not completed demonstrations. Not affiliated with Health Hue Digital.*
-
-
-## Canonical Rules and Ownership
-
-Numeric targets come from `sla_policy.csv`. The dashboard, SLA checker and ticket router share `support_rules.py`. Issue type selects an initial team; reviewed priority selects the SLA tier. Booking, Payments and Messaging start with Platform Support; Account starts with Account Support; Other or unknown input goes to General Support triage.
-
-Routing is a suggestion. `assigned_owner` is blank in these fictional records because no named owner has accepted assignment. Operational tickets require one accountable owner; specialist escalation retains that owner until an accepted transfer is recorded.
-
-Historical results: T001 Met, T002 Breached, T003 Creation Time Missing/Invalid. Two evaluable tickets yield 50% compliance; one ticket cannot be evaluated. Missing history is not a confirmed breach. Resolution targets are reference values, not measured performance.
-
-`tickets_backup.csv` is an inactive historical snapshot. No script loads it; `tickets.csv` is the active queue. Do not restore the snapshot as current policy or assignment data.
-
-Leadership decisions and detailed status definitions are documented in the [support SOP](docs/platform-support-sop.md). Run `python -m unittest discover -s tests -v` to verify shared rules.
+</details>
