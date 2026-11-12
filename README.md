@@ -4,13 +4,15 @@ Support operations portfolio for a healthcare SaaS platform: booking, calendar, 
 
 **My approach:** Understand the issue, guide initial troubleshooting, keep the clinic informed, and escalate with useful context.
 
+### [Open Live Dashboard →](https://clinic-support-operations-lab-qzcgaprlcsp8dvyn7ql4rb.streamlit.app/)
+
 ## What’s Inside
 
 | Work Sample | Skill Demonstrated |
 | :--- | :--- |
+| **[Interactive Dashboard](https://clinic-support-operations-lab-qzcgaprlcsp8dvyn7ql4rb.streamlit.app/)** | Ticket organization, first-response SLA monitoring, team routing, and risk simulation |
 | **[Customer Help Article](docs/help-article.md)** — Missing Appointment | Clear troubleshooting guidance for nontechnical front-desk staff |
 | **[Support SOP](docs/platform-support-sop.md)** — Triage → Troubleshoot → Update → Escalate | Structured investigations, customer communication, and handoff procedures |
-| **[Dashboard Code](dashboard.py)** — Queue, SLAs, Routing | First-response tracking, breach identification, and suggested team ownership |
 
 ## Three Fictional Clinic Scenarios
 
@@ -47,14 +49,15 @@ The SOP documents how to capture:
 - Troubleshooting already attempted.
 - Next action and receiving team.
 
-## Dashboard Features
+## Explore the Dashboard
 
-- Filter tickets by clinic, priority, status, and issue type.
-- Compare recorded first-response times against configurable SLA targets.
-- Flag response breaches and incomplete timestamp records.
-- Suggest support teams using issue-based routing rules.
-- Simulate approaching response deadlines with an elapsed-time slider.
-- Download ticket, SLA, routing, and simulation reports as CSV files.
+1. **Overview:** Review ticket counts, priorities, and sample SLA performance.
+2. **Ticket Queue:** Filter requests by clinic, priority, status, and issue type.
+3. **SLA Monitoring:** Review response-target breaches and incomplete records.
+4. **Ticket Routing:** Inspect suggested support-team assignments.
+5. **SLA Risk Alerts:** Adjust hypothetical elapsed time to explore warning and breach thresholds.
+
+Downloadable CSV reports support further review and handoffs.
 
 ## Run Locally
 
@@ -64,8 +67,6 @@ Requires **Python 3.10 or later**. Download or clone this repository, open its f
 python3 -m pip install -r requirements.txt
 python3 -m streamlit run dashboard.py
 ```
-
-Open the local URL displayed in the terminal.
 
 **Tools:** Python · Streamlit · pandas · CSV · Markdown
 
