@@ -16,6 +16,7 @@ No local installation required to review the dashboard.
 
 | Work Sample | What to Look For |
 |---|---|
+| **[Calendar Troubleshooting Investigation](docs/calendar-reproduction.md)** | Real demo screenshots, reproduction steps, before-and-after verification, customer guidance, and escalation judgment |
 | **[Live Support Dashboard](https://clinic-support-operations-lab-qzcgaprlcsp8dvyn7ql4rb.streamlit.app/)** | Ticket filtering, first-response SLA results, incomplete records, suggested routing, and simulated risk alerts |
 | **[Customer Help Article: Missing Appointment](docs/help-article.md)** | Simple troubleshooting steps for nontechnical clinic staff, with clear guidance on when to contact support |
 | **[Platform Support SOP](docs/platform-support-sop.md)** | Triage, troubleshooting, customer updates, bug-report requirements, escalation, screen-sharing procedures, and shift handoffs |
@@ -85,7 +86,8 @@ Downloadable CSV reports support further review and handoffs.
 
 | Implemented or Written | Documented Procedure / Future Evidence |
 |---|---|
-| Interactive dashboard and fictional ticket queue | Completed bug reproduction with captured evidence |
+| Interactive dashboard and fictional ticket queue | Confirmed software-defect reproduction |
+| [Calendar filter investigation with screenshots](docs/calendar-reproduction.md) | Narrated troubleshooting walkthrough |
 | First-response SLA calculations and missing-data handling | Measured resolution times |
 | Suggested initial team routing | Accepted assignments and completed handoffs |
 | Customer-facing help article | Recorded screen-share walkthrough |
