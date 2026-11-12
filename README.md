@@ -50,9 +50,8 @@ The clinic reports missing reminders. The SOP covers notification triggers, deli
 | **5. Track & Review** | [§14 SLA Management](docs/platform-support-sop.md#14-support-ticket-documentation--sla-management) · [§16.4 Improvement](docs/platform-support-sop.md#164-continuous-improvement) | Response targets, unevaluable records, follow-ups and recurring issues |
 | **6. Hand Over** | [§17.1 Handoff](docs/platform-support-sop.md#171-end-of-shift-handoff) · [§17.2 Template](docs/platform-support-sop.md#172-end-of-shift-handoff-template) | Ticket ID, current status, owner, next action and promised update |
 
-## Full SOP
+Full SOP
 [Read the complete Platform Support Standard Operating Procedure →](docs/platform-support-sop.md)
-
 *Independent portfolio demonstration using fictional scenarios.*
 The SOP documents how to capture:
 
