@@ -73,3 +73,16 @@ python3 -m streamlit run dashboard.py
 ---
 
 *Independent portfolio demonstration using fictional clinics, tickets, and SLA targets. No real patient information is included. SLA reporting evaluates first responses using elapsed time; risk alerts are hypothetical simulations. Bug reproduction and screen sharing are documented procedures, not completed demonstrations. Not affiliated with Health Hue Digital.*
+
+
+## Canonical Rules and Ownership
+
+Numeric targets come from `sla_policy.csv`. The dashboard, SLA checker and ticket router share `support_rules.py`. Issue type selects an initial team; reviewed priority selects the SLA tier. Booking, Payments and Messaging start with Platform Support; Account starts with Account Support; Other or unknown input goes to General Support triage.
+
+Routing is a suggestion. `assigned_owner` is blank in these fictional records because no named owner has accepted assignment. Operational tickets require one accountable owner; specialist escalation retains that owner until an accepted transfer is recorded.
+
+Historical results: T001 Met, T002 Breached, T003 Creation Time Missing/Invalid. Two evaluable tickets yield 50% compliance; one ticket cannot be evaluated. Missing history is not a confirmed breach. Resolution targets are reference values, not measured performance.
+
+`tickets_backup.csv` is an inactive historical snapshot. No script loads it; `tickets.csv` is the active queue. Do not restore the snapshot as current policy or assignment data.
+
+Leadership decisions and detailed status definitions are documented in the [support SOP](docs/platform-support-sop.md). Run `python -m unittest discover -s tests -v` to verify shared rules.

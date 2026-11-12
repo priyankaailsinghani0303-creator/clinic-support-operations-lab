@@ -57,11 +57,25 @@ This procedure is designed for fictional training scenarios. Actual platform con
 | Clinic Owner / Administrator | Provides account information, confirms clinic configurations and coordinates access for authorized staff. |
 | Clinic Front-Desk Staff | Reports booking, calendar, messaging and account issues and follows troubleshooting guidance. |
 
-### 3.1 Support Ownership
+### 3.1 Canonical Initial Routing
+
+| Ticket issue type | Initial accountable team |
+|---|---|
+| Booking | Platform Support |
+| Payments | Platform Support |
+| Messaging | Platform Support |
+| Account | Account Support |
+| Other / unrecognized input | General Support |
+
+Account Support verifies authorization and follows approved access procedures. General Support clarifies unclassified requests and confirms priority and ownership. Category names used in stored tickets are Booking, Payments, Messaging, Account and Other. Unknown inputs receive General Support triage and must be reclassified; no SLA tier is inferred from category.
+
+Routing output is a suggestion, not an accepted assignment. Each active operational ticket requires exactly one named `assigned_owner` in its accountable team. Portfolio rows leave this field blank because no assignment has been accepted. The Support Team Lead must resolve any unassigned operational ticket.
+
+### 3.2 Support Ownership
 
 The Platform Support Specialist remains responsible for communicating with the customer until the issue is resolved or formally handed over according to the support team's escalation process.
 
-### 3.2 Escalation Ownership
+### 3.3 Escalation Ownership
 
 Escalating a ticket does not mean abandoning customer communication. The assigned support specialist must document the handoff, communicate relevant updates and monitor the ticket until ownership is clearly transferred.
 
@@ -546,46 +560,56 @@ Every customer interaction must be documented in the support ticket.
 
 ### 14.2 Priority-Based SLA Targets
 
-The following are illustrative portfolio targets, not verified Health Hue contractual SLAs.
+The following are illustrative portfolio targets, not verified Health Hue contractual SLAs. `sla_policy.csv` is the canonical numeric source; this table mirrors it. Both scripts and the dashboard use `support_rules.py`.
 
-| Priority | First Response Target | Resolution Target |
+Calculations use elapsed minutes in UTC; naive timestamps are treated as UTC. Coverage hours do not pause this demonstration clock. Business-hour calendars, holidays, resolution monitoring and live unanswered-ticket deadlines are not implemented. Resolution targets below are reference values only.
+
+Priority is based on reviewed impact, independently of issue type:
+- Urgent: critical clinic workflow unavailable, with no usable workaround.
+- High: major operational disruption requiring prompt investigation.
+- Medium: limited disruption with continued operations possible.
+- Low: guidance, minor configuration or low-impact request.
+
+These severity criteria are proposed portfolio definitions. T001/Urgent, T002/High and T003/Medium are fictional assumptions requiring impact confirmation before operational use.
+
+| Priority | First Response Target | Reference Resolution Target |
 |---|---:|---:|
 | Urgent | 15 minutes | 120 minutes |
 | High | 30 minutes | 240 minutes |
 | Medium | 120 minutes | 480 minutes |
-| Low | Defined by support policy | Defined by support policy |
+| Low | 240 minutes | 1440 minutes |
 
 ### 14.3 SLA Monitoring Procedure
 
-1. Record the ticket creation timestamp.
-2. Record the first support response timestamp.
-3. Calculate elapsed time to first response.
-4. Compare actual response time against the applicable priority target.
-5. Mark the ticket as SLA MET or SLA BREACHED.
-6. Monitor unresolved tickets against their resolution targets.
-7. Identify tickets approaching their SLA deadlines.
-8. Escalate breached tickets according to their priority and impact.
-9. Document the reason for delays and any corrective action.
-10. Include SLA performance in periodic support reports.
+1. Validate unique ticket IDs, policy priorities and timestamp records.
+2. Normalize priority labels and require a recognized priority with one positive finite target.
+3. Parse creation and first-response timestamps in UTC.
+4. Classify valid responses as Met when elapsed minutes are at or below target; otherwise Breached.
+5. Classify missing rows or invalid creation as Creation Time Missing/Invalid; blank response with valid creation as Response Not Recorded; invalid or earlier response as Invalid Response Timestamp.
+6. Report duplicate timestamp rows as Duplicate Timestamp Records and missing/ambiguous/invalid policy as Policy Missing/Invalid.
+7. Group all statuses other than Met/Breached under Cannot Evaluate SLA. Never infer a breach from missing data.
+8. Calculate compliance as Met / (Met + Breached); show N/A when no records are evaluable.
+9. Keep hypothetical risk alerts separate: On Track below 80%, At Risk from 80% through the target, Breached above target.
+10. Review confirmed breaches, update the clinic, notify the Support Team Lead and record next actions. Resolution monitoring is planned, not calculated.
 
 ### 14.4 SLA Performance Reporting
 
 | Metric | Description |
 |---|---|
-| Tickets evaluated | Total tickets with recorded first responses. |
+| Tickets evaluated | Tickets classified as Met or Breached after validation. |
 | SLA met | Tickets responded to within the target. |
 | SLA breached | Tickets responded to after the target. |
 | SLA compliance rate | Percentage of evaluated tickets meeting the target. |
-| Missing responses | Tickets without recorded first responses. |
-| Average first response time | Average elapsed time before the first response. |
-| Average resolution time | Average elapsed time before resolution. |
+| Cannot Evaluate SLA | All statuses other than Met or Breached, broken down by reason. |
+| Average first response time | Optional derived metric over valid evaluated responses; not currently displayed. |
+| Average resolution time | Not implemented; requires resolution records and agreed clock rules. |
 
 ### 14.5 Escalation Triggers
 
 Escalate or flag tickets when:
 
 - First-response SLA targets are breached.
-- Resolution targets are approaching or exceeded.
+- A manually reviewed resolution commitment needs attention; automated resolution monitoring is not implemented.
 - Multiple clinics report the same issue.
 - Critical platform features become unavailable.
 - Customer operations are significantly disrupted.
@@ -597,16 +621,18 @@ Escalate or flag tickets when:
 
 ---
 
-## 15. Engineering Escalation Matrix
+## 15. Specialist Escalation Matrix
+
+The initial support owner remains accountable for customer communication while specialist teams investigate. Transfer accountability only after one receiving owner accepts; record the new owner and acceptance time. An escalation, linked investigation or Product feedback item does not create a second accountable ticket owner. Payments Team is the canonical name for transaction specialists. Engineering Team investigates suspected software defects. For payment software defects use Engineering; transaction discrepancies use Payments. Product Team receives a separate improvement item for recurring issues.
 
 | Scenario | Escalate To | How | Timeframe |
 |---|---|---|---|
-| Booking or calendar malfunction | Technical Support / Engineering | Support ticket with reproduction steps | According to severity and SLA |
+| Booking or calendar malfunction | Engineering Team | Support ticket with reproduction steps | According to severity and SLA |
 | Payment processing failure | Payments Team | Ticket with transaction reference and error details | Promptly, based on business impact |
-| Multiple clinics affected by messaging failure | Engineering / Product Team | High-priority incident escalation | Immediately if widespread |
-| Individual account access issue unresolved | Technical Support Team | Ticket with sanitized error details | According to applicable SLA |
+| Multiple clinics affected by messaging failure | Engineering Team | High-priority incident escalation | Immediately if widespread |
+| Individual account access issue unresolved | Engineering Team | Ticket with sanitized error details | According to applicable SLA |
 | Reproducible software defect | Engineering Team | Structured bug report with evidence | According to severity |
-| Suspected unauthorized account access | Security / Designated Incident Response Team | Approved security escalation channel | Immediately |
+| Suspected unauthorized account access | Security Team (contact pending designation) | Approved security escalation channel | Immediately |
 | Repeated customer complaints about one feature | Product Team | Documented issue pattern and ticket references | During support review |
 | Customer issue remains unresolved after troubleshooting | Support Team Lead | Internal escalation with investigation history | Before applicable SLA expires |
 
@@ -668,6 +694,8 @@ Before transferring a ticket to another team, the specialist must:
 
 ### 16.3 Suggested Knowledge Base Categories
 
+These are documentation display labels, not additional ticket routing types. CRM & Reporting requests use Other until triaged. Booking & Calendar maps to Booking; Payments & POS to Payments; Account Settings to Account.
+
 | Category | Example Article |
 |---|---|
 | Booking & Calendar | Why is an appointment not appearing in my calendar? |
@@ -702,7 +730,7 @@ At the end of each shift, the Platform Support Specialist reviews outstanding ti
 | Activity | Requirement |
 |---|---|
 | Open tickets | Review all unresolved tickets. |
-| SLA breaches | Identify tickets with breached response or resolution targets. |
+| SLA breaches | Identify confirmed first-response breaches; review resolution commitments manually. |
 | Pending escalations | Confirm the receiving team's ownership and next action. |
 | Customer follow-ups | Document promised updates and outstanding responses. |
 | Critical issues | Highlight incidents affecting clinic operations. |
@@ -750,7 +778,7 @@ Notes for next shift:
 
 **Review cadence:** Quarterly, or whenever a significant support workflow or platform process changes.
 
-**Approval:** This is an independent portfolio demonstration. Approval by an authorized support manager would be required before operational adoption.
+**Approval:** This is an independent portfolio demonstration. Before operational adoption, leadership must approve actual SLA values; severity and clinical-safety procedures; first-response eligibility (including automated acknowledgements); elapsed versus business-hour clocks, timezone, holidays and after-hours coverage; resolution definitions, pauses and reopening; security contacts; and named team owners and accepted handovers.
 
 ---
 
@@ -781,6 +809,7 @@ Notes for next shift:
 ---
 
 *End of Platform Support Standard Operating Procedure*
+
 
 
 

@@ -1,43 +1,16 @@
-
-import csv
+"""Print canonical initial team suggestions; these are not accepted assignments."""
 from pathlib import Path
+import pandas as pd
+from support_rules import route_ticket
 
 BASE_DIR = Path(__file__).resolve().parent
 
-ROUTING_RULES = {
-    "Booking": "Platform Support",
-    "Payments": "Billing Support",
-    "Messaging": "Technical Support",
-    "Account": "Account Support",
-}
 
-def route_ticket(ticket):
-    issue_type = ticket["issue_type"].strip().title()
+def main():
+    tickets = pd.read_csv(BASE_DIR / "tickets.csv")
+    print("SUGGESTED INITIAL SUPPORT ROUTING")
+    print(pd.DataFrame([route_ticket(row) for _, row in tickets.iterrows()]).to_string(index=False))
 
-    assigned_team = ROUTING_RULES.get(
-        issue_type,
-        "General Support"
-    )
 
-    return {
-        "ticket_id": ticket["ticket_id"],
-        "issue_type": issue_type,
-        "priority": ticket["priority"],
-        "assigned_team": assigned_team,
-    }
-
-with open(BASE_DIR / "tickets.csv", newline="") as file:
-    tickets = list(csv.DictReader(file))
-
-print("AUTOMATED SUPPORT TICKET ROUTING")
-print("-" * 55)
-
-for ticket in tickets:
-    result = route_ticket(ticket)
-
-    print(
-        f"{result['ticket_id']} | "
-        f"{result['issue_type']} | "
-        f"{result['priority']} | "
-        f"{result['assigned_team']}"
-    )
+if __name__ == "__main__":
+    main()

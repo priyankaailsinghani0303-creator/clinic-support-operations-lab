@@ -3,6 +3,8 @@ from pathlib import Path
 import pandas as pd
 import streamlit as st
 
+from support_rules import calculate_sla, route_ticket, simulation_status, simulation_action
+
 
 st.set_page_config(
     page_title="Clinic Support Operations Lab",
@@ -85,156 +87,6 @@ if tickets["ticket_id"].duplicated().any():
 # HISTORICAL SLA CALCULATIONS
 # --------------------------------------------------
 
-def parse_time(value):
-    """Parse one timestamp; naive timestamps are treated as UTC."""
-    if pd.isna(value) or not str(value).strip():
-        return pd.NaT
-
-    return pd.to_datetime(
-        str(value).strip(),
-        errors="coerce",
-        utc=True,
-    )
-
-
-def calculate_sla(ticket_data, timestamp_data, policy_data):
-    result = ticket_data.copy()
-
-    result["first_response_minutes"] = float("nan")
-    result["response_minutes"] = float("nan")
-    result["created_at"] = pd.NA
-    result["first_responded_at"] = pd.NA
-    result["SLA Status"] = "Policy Missing/Invalid"
-
-    # Build a policy lookup. Ambiguous duplicate priorities
-    # are excluded rather than silently choosing one.
-    policy_map = {}
-
-    if {"priority", "first_response_minutes"}.issubset(
-        policy_data.columns
-    ):
-        policy_copy = policy_data.copy()
-        policy_copy["priority"] = (
-            policy_copy["priority"]
-            .fillna("")
-            .astype(str)
-            .str.strip()
-            .str.title()
-        )
-
-        duplicates = policy_copy["priority"].duplicated(
-            keep=False
-        )
-
-        for _, row in policy_copy.loc[~duplicates].iterrows():
-            policy_map[row["priority"]] = row[
-                "first_response_minutes"
-            ]
-
-    # Build a timestamp lookup.
-    timestamp_map = {}
-    duplicate_timestamp_ids = set()
-
-    if {
-        "ticket_id",
-        "created_at",
-        "first_responded_at",
-    }.issubset(timestamp_data.columns):
-        timestamp_copy = timestamp_data.copy()
-        timestamp_copy["ticket_id"] = (
-            timestamp_copy["ticket_id"]
-            .fillna("")
-            .astype(str)
-            .str.strip()
-        )
-
-        duplicates = timestamp_copy["ticket_id"].duplicated(
-            keep=False
-        )
-
-        duplicate_timestamp_ids = set(
-            timestamp_copy.loc[duplicates, "ticket_id"]
-        )
-
-        timestamp_map = {
-            row["ticket_id"]: row
-            for _, row in timestamp_copy.loc[
-                ~duplicates
-            ].iterrows()
-        }
-
-    for index, ticket in result.iterrows():
-        ticket_id = ticket["ticket_id"]
-
-        target = pd.to_numeric(
-            policy_map.get(ticket["priority"]),
-            errors="coerce",
-        )
-
-        if pd.isna(target) or target <= 0 or target == float("inf"):
-            continue
-
-        result.at[index, "first_response_minutes"] = float(
-            target
-        )
-
-        if ticket_id in duplicate_timestamp_ids:
-            result.at[index, "SLA Status"] = (
-                "Duplicate Timestamp Records"
-            )
-            continue
-
-        record = timestamp_map.get(ticket_id)
-
-        if record is None:
-            result.at[index, "SLA Status"] = (
-                "Creation Time Missing/Invalid"
-            )
-            continue
-
-        raw_created = record["created_at"]
-        raw_response = record["first_responded_at"]
-
-        result.at[index, "created_at"] = raw_created
-        result.at[index, "first_responded_at"] = raw_response
-
-        created = parse_time(raw_created)
-
-        if pd.isna(created):
-            result.at[index, "SLA Status"] = (
-                "Creation Time Missing/Invalid"
-            )
-            continue
-
-        if pd.isna(raw_response) or not str(raw_response).strip():
-            result.at[index, "SLA Status"] = (
-                "Response Not Recorded"
-            )
-            continue
-
-        responded = parse_time(raw_response)
-
-        if pd.isna(responded) or responded < created:
-            result.at[index, "SLA Status"] = (
-                "Invalid Response Timestamp"
-            )
-            continue
-
-        response_minutes = (
-            responded - created
-        ).total_seconds() / 60
-
-        result.at[index, "response_minutes"] = response_minutes
-
-        result.at[index, "SLA Status"] = (
-            "Met"
-            if response_minutes <= target
-            else "Breached"
-        )
-
-    return result
-
-
 # --------------------------------------------------
 # FILTERS
 # --------------------------------------------------
@@ -284,76 +136,6 @@ compliance = (
 # --------------------------------------------------
 # ROUTING
 # --------------------------------------------------
-
-ROUTING_RULES = {
-    "Booking": (
-        "Platform Support",
-        "Review booking status, calendar filters and scope.",
-    ),
-    "Payments": (
-        "Platform Support",
-        "Check transaction status; escalate discrepancies "
-        "to payments specialists or technical defects to engineering.",
-    ),
-    "Messaging": (
-        "Platform Support",
-        "Check reminder configuration and provider delivery evidence.",
-    ),
-    "Account": (
-        "Account Support",
-        "Verify authorization and follow approved access procedures.",
-    ),
-}
-
-
-def route_ticket(ticket):
-    team, reason = ROUTING_RULES.get(
-        ticket["issue_type"],
-        (
-            "General Support",
-            "Clarify the issue and identify the appropriate owner.",
-        ),
-    )
-
-    return {
-        "ticket_id": ticket["ticket_id"],
-        "issue_type": ticket["issue_type"],
-        "priority": ticket["priority"],
-        "suggested_initial_team": team,
-        "routing_reason": reason,
-    }
-
-
-# --------------------------------------------------
-# RISK SIMULATION
-# --------------------------------------------------
-
-def simulation_status(elapsed, target):
-    if elapsed > target:
-        return "BREACHED"
-
-    if elapsed >= target * 0.8:
-        return "AT RISK"
-
-    return "ON TRACK"
-
-
-def simulation_action(status):
-    actions = {
-        "BREACHED": (
-            "Verify response history. If unanswered, respond promptly, "
-            "notify the support lead and record the missed target."
-        ),
-        "AT RISK": (
-            "Prioritize the response and confirm the assigned owner."
-        ),
-        "ON TRACK": (
-            "Continue monitoring and respond within the target."
-        ),
-    }
-
-    return actions[status]
-
 
 valid_targets = sla[
     sla["first_response_minutes"].notna()
@@ -454,6 +236,11 @@ with queue_tab:
     st.caption("Fictional clinic support scenarios.")
 
     st.metric("Tickets in Queue", len(filtered))
+    if "assigned_owner" in filtered:
+        unassigned = filtered["assigned_owner"].fillna("").astype(str).str.strip().eq("")
+        st.metric("Owner Not Assigned", int(unassigned.sum()))
+        if unassigned.any():
+            st.info("Fictional records have no accepted named owner. Operational tickets require one accountable owner.")
 
     st.dataframe(
         filtered,
@@ -736,3 +523,4 @@ st.caption(
     "demonstration · No real patient data · "
     "No live monitoring or AI predictions"
 )
+

@@ -1,4 +1,4 @@
-ticket_id,clinic,issue_type,priority,status,description
-T001,Demo Aesthetic Clinic,Booking,Urgent,Open,Online appointments are not appearing in the clinic calendar
-T002,Demo Wellness Clinic,Payments,High,Open,Clinic staff cannot process card payments
-T003,Demo Skin Clinic,Messaging,Medium,Open,Appointment reminder messages are not being delivered
+ticket_id,clinic,issue_type,priority,status,description,assigned_owner
+T001,Demo Aesthetic Clinic,Booking,Urgent,Open,Online appointments are not appearing in the clinic calendar,
+T002,Demo Wellness Clinic,Payments,High,Open,Clinic staff cannot process card payments,
+T003,Demo Skin Clinic,Messaging,Medium,Open,Appointment reminder messages are not being delivered,
