@@ -53,6 +53,7 @@ The clinic reports missing reminders. The SOP covers notification triggers, deli
 Full SOP
 [Read the complete Platform Support Standard Operating Procedure →](docs/platform-support-sop.md)
 *Independent portfolio demonstration using fictional scenarios.*
+
 The SOP documents how to capture:
 
 - Expected versus actual behavior.
