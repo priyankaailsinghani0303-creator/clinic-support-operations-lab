@@ -1,20 +1,21 @@
-
-import streamlit as st
-import pandas as pd
 from pathlib import Path
+
+import pandas as pd
+import streamlit as st
+
 
 st.set_page_config(
     page_title="Clinic Support Operations Lab",
     page_icon="🏥",
-    layout="wide"
+    layout="wide",
 )
 
 BASE_DIR = Path(__file__).resolve().parent
 
 st.title("🏥 Clinic Support Operations Lab")
 st.caption(
-    "Healthcare SaaS support portfolio | Fictional clinic scenarios "
-    "| Rule-based workflow demonstration"
+    "Healthcare SaaS support portfolio · Fictional clinic scenarios · "
+    "Rule-based workflow demonstration"
 )
 
 
@@ -25,251 +26,309 @@ st.caption(
 @st.cache_data
 def load_csv(filename):
     path = BASE_DIR / filename
+
     if not path.exists():
         return pd.DataFrame()
-    return pd.read_csv(path)
+
+    try:
+        return pd.read_csv(path)
+    except (pd.errors.EmptyDataError, pd.errors.ParserError):
+        return pd.DataFrame()
 
 
 tickets = load_csv("tickets.csv")
 timestamps = load_csv("ticket_timestamps.csv")
 policies = load_csv("sla_policy.csv")
 
-required_ticket_columns = [
+required_columns = {
     "ticket_id",
     "clinic",
     "issue_type",
     "priority",
     "status",
-    "description"
-]
+    "description",
+}
 
 if tickets.empty:
     st.error("tickets.csv is missing or empty.")
     st.stop()
 
-missing_columns = [
-    col for col in required_ticket_columns
-    if col not in tickets.columns
-]
+missing_columns = required_columns - set(tickets.columns)
 
 if missing_columns:
     st.error(
         "Missing ticket columns: "
-        + ", ".join(missing_columns)
+        + ", ".join(sorted(missing_columns))
     )
     st.stop()
 
-tickets["ticket_id"] = tickets["ticket_id"].astype(str)
+tickets = tickets.copy()
 
-for col in ["clinic", "issue_type", "priority", "status"]:
-    tickets[col] = tickets[col].fillna("Unknown").astype(str).str.strip()
+for column in required_columns:
+    tickets[column] = (
+        tickets[column].fillna("").astype(str).str.strip()
+    )
 
-for col in ["issue_type", "priority", "status"]:
-    tickets[col] = tickets[col].str.title()
+for column in ["priority", "status", "issue_type"]:
+    tickets[column] = tickets[column].str.title()
 
+if tickets["ticket_id"].eq("").any():
+    st.error("Every ticket must have a ticket_id.")
+    st.stop()
 
-# --------------------------------------------------
-# SIDEBAR FILTERS
-# --------------------------------------------------
-
-st.sidebar.header("Ticket Filters")
-
-selected_clinics = st.sidebar.multiselect(
-    "Clinic",
-    sorted(tickets["clinic"].unique()),
-    default=sorted(tickets["clinic"].unique())
-)
-
-selected_priorities = st.sidebar.multiselect(
-    "Priority",
-    sorted(tickets["priority"].unique()),
-    default=sorted(tickets["priority"].unique())
-)
-
-selected_statuses = st.sidebar.multiselect(
-    "Status",
-    sorted(tickets["status"].unique()),
-    default=sorted(tickets["status"].unique())
-)
-
-selected_types = st.sidebar.multiselect(
-    "Issue Type",
-    sorted(tickets["issue_type"].unique()),
-    default=sorted(tickets["issue_type"].unique())
-)
-
-filtered = tickets[
-    tickets["clinic"].isin(selected_clinics)
-    & tickets["priority"].isin(selected_priorities)
-    & tickets["status"].isin(selected_statuses)
-    & tickets["issue_type"].isin(selected_types)
-].copy()
+if tickets["ticket_id"].duplicated().any():
+    st.error("Duplicate ticket IDs found in tickets.csv.")
+    st.stop()
 
 
 # --------------------------------------------------
-# SLA CALCULATIONS
+# HISTORICAL SLA CALCULATIONS
 # --------------------------------------------------
+
+def parse_time(value):
+    """Parse one timestamp; naive timestamps are treated as UTC."""
+    if pd.isna(value) or not str(value).strip():
+        return pd.NaT
+
+    return pd.to_datetime(
+        str(value).strip(),
+        errors="coerce",
+        utc=True,
+    )
+
 
 def calculate_sla(ticket_data, timestamp_data, policy_data):
     result = ticket_data.copy()
 
-    result["first_response_minutes"] = pd.NA
+    result["first_response_minutes"] = float("nan")
     result["response_minutes"] = float("nan")
-    result["SLA Status"] = "Policy Missing"
+    result["created_at"] = pd.NA
+    result["first_responded_at"] = pd.NA
+    result["SLA Status"] = "Policy Missing/Invalid"
 
-    if not policy_data.empty and {
-        "priority",
-        "first_response_minutes"
-    }.issubset(policy_data.columns):
+    # Build a policy lookup. Ambiguous duplicate priorities
+    # are excluded rather than silently choosing one.
+    policy_map = {}
 
-        policy_data = policy_data.copy()
-        policy_data["priority"] = (
-            policy_data["priority"].astype(str).str.strip().str.title()
-        )
-        policy_data["first_response_minutes"] = pd.to_numeric(
-            policy_data["first_response_minutes"],
-            errors="coerce"
-        )
-
-        result = result.drop(
-            columns=["first_response_minutes"]
-        ).merge(
-            policy_data[
-                ["priority", "first_response_minutes"]
-            ].drop_duplicates("priority"),
-            on="priority",
-            how="left"
+    if {"priority", "first_response_minutes"}.issubset(
+        policy_data.columns
+    ):
+        policy_copy = policy_data.copy()
+        policy_copy["priority"] = (
+            policy_copy["priority"]
+            .fillna("")
+            .astype(str)
+            .str.strip()
+            .str.title()
         )
 
-    if not timestamp_data.empty and {
+        duplicates = policy_copy["priority"].duplicated(
+            keep=False
+        )
+
+        for _, row in policy_copy.loc[~duplicates].iterrows():
+            policy_map[row["priority"]] = row[
+                "first_response_minutes"
+            ]
+
+    # Build a timestamp lookup.
+    timestamp_map = {}
+    duplicate_timestamp_ids = set()
+
+    if {
         "ticket_id",
         "created_at",
-        "first_responded_at"
+        "first_responded_at",
     }.issubset(timestamp_data.columns):
-
-        timestamp_data = timestamp_data.copy()
-        timestamp_data["ticket_id"] = (
-            timestamp_data["ticket_id"].astype(str)
+        timestamp_copy = timestamp_data.copy()
+        timestamp_copy["ticket_id"] = (
+            timestamp_copy["ticket_id"]
+            .fillna("")
+            .astype(str)
+            .str.strip()
         )
 
-        result = result.merge(
-            timestamp_data[
-                ["ticket_id", "created_at", "first_responded_at"]
-            ].drop_duplicates("ticket_id"),
-            on="ticket_id",
-            how="left"
+        duplicates = timestamp_copy["ticket_id"].duplicated(
+            keep=False
         )
 
-        created = pd.to_datetime(
-            result["created_at"],
+        duplicate_timestamp_ids = set(
+            timestamp_copy.loc[duplicates, "ticket_id"]
+        )
+
+        timestamp_map = {
+            row["ticket_id"]: row
+            for _, row in timestamp_copy.loc[
+                ~duplicates
+            ].iterrows()
+        }
+
+    for index, ticket in result.iterrows():
+        ticket_id = ticket["ticket_id"]
+
+        target = pd.to_numeric(
+            policy_map.get(ticket["priority"]),
             errors="coerce",
-            utc=True
         )
 
-        responded = pd.to_datetime(
-            result["first_responded_at"],
-            errors="coerce",
-            utc=True
+        if pd.isna(target) or target <= 0 or target == float("inf"):
+            continue
+
+        result.at[index, "first_response_minutes"] = float(
+            target
         )
 
-        result["response_minutes"] = (
+        if ticket_id in duplicate_timestamp_ids:
+            result.at[index, "SLA Status"] = (
+                "Duplicate Timestamp Records"
+            )
+            continue
+
+        record = timestamp_map.get(ticket_id)
+
+        if record is None:
+            result.at[index, "SLA Status"] = (
+                "Creation Time Missing/Invalid"
+            )
+            continue
+
+        raw_created = record["created_at"]
+        raw_response = record["first_responded_at"]
+
+        result.at[index, "created_at"] = raw_created
+        result.at[index, "first_responded_at"] = raw_response
+
+        created = parse_time(raw_created)
+
+        if pd.isna(created):
+            result.at[index, "SLA Status"] = (
+                "Creation Time Missing/Invalid"
+            )
+            continue
+
+        if pd.isna(raw_response) or not str(raw_response).strip():
+            result.at[index, "SLA Status"] = (
+                "Response Not Recorded"
+            )
+            continue
+
+        responded = parse_time(raw_response)
+
+        if pd.isna(responded) or responded < created:
+            result.at[index, "SLA Status"] = (
+                "Invalid Response Timestamp"
+            )
+            continue
+
+        response_minutes = (
             responded - created
-        ).dt.total_seconds() / 60
+        ).total_seconds() / 60
 
-        result["SLA Status"] = "Policy Missing"
+        result.at[index, "response_minutes"] = response_minutes
 
-        valid_policy = (
-            pd.to_numeric(
-                result["first_response_minutes"],
-                errors="coerce"
-            ) > 0
+        result.at[index, "SLA Status"] = (
+            "Met"
+            if response_minutes <= target
+            else "Breached"
         )
-
-        result.loc[
-            valid_policy, "SLA Status"
-        ] = "Creation Time Missing/Invalid"
-
-        valid_created = created.notna() & valid_policy
-
-        result.loc[
-            valid_created, "SLA Status"
-        ] = "Response Not Recorded"
-
-        invalid_response = (
-            valid_created
-            & responded.notna()
-            & (result["response_minutes"] < 0)
-        )
-
-        result.loc[
-            invalid_response, "SLA Status"
-        ] = "Invalid Response Timestamp"
-
-        valid_response = (
-            valid_created
-            & responded.notna()
-            & (result["response_minutes"] >= 0)
-        )
-
-        met = (
-            valid_response
-            & (
-                result["response_minutes"]
-                <= result["first_response_minutes"]
-            )
-        )
-
-        breached = (
-            valid_response
-            & (
-                result["response_minutes"]
-                > result["first_response_minutes"]
-            )
-        )
-
-        result.loc[met, "SLA Status"] = "Met"
-        result.loc[breached, "SLA Status"] = "Breached"
 
     return result
 
 
+# --------------------------------------------------
+# FILTERS
+# --------------------------------------------------
+
+st.sidebar.header("Ticket Filters")
+
+filtered = tickets.copy()
+
+for column, label in [
+    ("clinic", "Clinic"),
+    ("priority", "Priority"),
+    ("status", "Status"),
+    ("issue_type", "Issue Type"),
+]:
+    options = sorted(tickets[column].unique().tolist())
+
+    selected = st.sidebar.multiselect(
+        label,
+        options,
+        default=options,
+        key=f"filter_{column}",
+    )
+
+    filtered = filtered[
+        filtered[column].isin(selected)
+    ].copy()
+
 sla = calculate_sla(filtered, timestamps, policies)
+
+met_count = int(sla["SLA Status"].eq("Met").sum())
+breached_count = int(
+    sla["SLA Status"].eq("Breached").sum()
+)
+unevaluated_count = int(
+    (~sla["SLA Status"].isin(["Met", "Breached"])).sum()
+)
+
+evaluated_count = met_count + breached_count
+
+compliance = (
+    f"{met_count / evaluated_count:.1%}"
+    if evaluated_count
+    else "N/A"
+)
 
 
 # --------------------------------------------------
-# TICKET ROUTING
+# ROUTING
 # --------------------------------------------------
 
 ROUTING_RULES = {
-    "Booking": "Platform Support",
-    "Payments": "Billing Support",
-    "Messaging": "Technical Support",
-    "Account": "Account Support"
+    "Booking": (
+        "Platform Support",
+        "Review booking status, calendar filters and scope.",
+    ),
+    "Payments": (
+        "Platform Support",
+        "Check transaction status; escalate discrepancies "
+        "to payments specialists or technical defects to engineering.",
+    ),
+    "Messaging": (
+        "Platform Support",
+        "Check reminder configuration and provider delivery evidence.",
+    ),
+    "Account": (
+        "Account Support",
+        "Verify authorization and follow approved access procedures.",
+    ),
 }
 
 
 def route_ticket(ticket):
-    issue_type = str(ticket.get("issue_type", "Unknown")).title()
+    team, reason = ROUTING_RULES.get(
+        ticket["issue_type"],
+        (
+            "General Support",
+            "Clarify the issue and identify the appropriate owner.",
+        ),
+    )
 
     return {
-        "ticket_id": ticket.get("ticket_id", ""),
-        "issue_type": issue_type,
-        "priority": ticket.get("priority", ""),
-        "assigned_team": ROUTING_RULES.get(
-            issue_type,
-            "General Support"
-        )
+        "ticket_id": ticket["ticket_id"],
+        "issue_type": ticket["issue_type"],
+        "priority": ticket["priority"],
+        "suggested_initial_team": team,
+        "routing_reason": reason,
     }
 
 
 # --------------------------------------------------
-# SLA RISK SIMULATION
+# RISK SIMULATION
 # --------------------------------------------------
 
 def simulation_status(elapsed, target):
-    if target <= 0:
-        return "UNAVAILABLE"
-
     if elapsed > target:
         return "BREACHED"
 
@@ -280,61 +339,41 @@ def simulation_status(elapsed, target):
 
 
 def simulation_action(status):
-    if status == "BREACHED":
-        return (
-            "Escalate immediately, notify the support lead, "
-            "and document the missed response target."
-        )
+    actions = {
+        "BREACHED": (
+            "Verify response history. If unanswered, respond promptly, "
+            "notify the support lead and record the missed target."
+        ),
+        "AT RISK": (
+            "Prioritize the response and confirm the assigned owner."
+        ),
+        "ON TRACK": (
+            "Continue monitoring and respond within the target."
+        ),
+    }
 
-    if status == "AT RISK":
-        return (
-            "Prioritize the ticket, notify the assigned team, "
-            "and prepare escalation."
-        )
-
-    if status == "ON TRACK":
-        return (
-            "Continue monitoring and respond within "
-            "the SLA target."
-        )
-
-    return "Verify the SLA policy."
+    return actions[status]
 
 
-valid_targets = sla.copy()
-
-valid_targets["first_response_minutes"] = pd.to_numeric(
-    valid_targets["first_response_minutes"],
-    errors="coerce"
-)
-
-valid_targets = valid_targets[
-    valid_targets["first_response_minutes"] > 0
+valid_targets = sla[
+    sla["first_response_minutes"].notna()
 ].copy()
 
-valid_ids = valid_targets["ticket_id"].tolist()
-
-if valid_ids:
-    if st.session_state.get("sim_ticket_id") not in valid_ids:
-        st.session_state["sim_ticket_id"] = valid_ids[0]
-        st.session_state["sim_elapsed"] = 0
-
-    if "sim_elapsed" not in st.session_state:
-        st.session_state["sim_elapsed"] = 0
-
 
 # --------------------------------------------------
-# DEFINE ALL FIVE TABS FIRST
+# TABS
 # --------------------------------------------------
 
-overview_tab, queue_tab, sla_tab, routing_tab, risk_tab = st.tabs(
-    [
-        "Overview",
-        "Ticket Queue",
-        "SLA Monitoring",
-        "Ticket Routing",
-        "SLA Risk Alerts"
-    ]
+overview_tab, queue_tab, sla_tab, routing_tab, risk_tab = (
+    st.tabs(
+        [
+            "Overview",
+            "Ticket Queue",
+            "SLA Monitoring",
+            "Ticket Routing",
+            "SLA Risk Alerts",
+        ]
+    )
 )
 
 
@@ -345,22 +384,24 @@ overview_tab, queue_tab, sla_tab, routing_tab, risk_tab = st.tabs(
 with overview_tab:
     st.header("Support Operations Overview")
 
-    total = len(filtered)
-    urgent = int(filtered["priority"].eq("Urgent").sum())
-    open_tickets = int(filtered["status"].eq("Open").sum())
-    high = int(filtered["priority"].eq("High").sum())
-
     c1, c2, c3, c4 = st.columns(4)
 
-    c1.metric("Total Tickets", total)
-    c2.metric("Urgent Tickets", urgent)
-    c3.metric("Open Tickets", open_tickets)
-    c4.metric("High Priority", high)
-
-    st.divider()
+    c1.metric("Total Tickets", len(filtered))
+    c2.metric(
+        "Open Tickets",
+        int(filtered["status"].eq("Open").sum()),
+    )
+    c3.metric(
+        "Urgent Tickets",
+        int(filtered["priority"].eq("Urgent").sum()),
+    )
+    c4.metric(
+        "High Priority",
+        int(filtered["priority"].eq("High").sum()),
+    )
 
     if filtered.empty:
-        st.info("No tickets match the current filters.")
+        st.info("No tickets match the selected filters.")
     else:
         left, right = st.columns(2)
 
@@ -377,86 +418,31 @@ with overview_tab:
             )
 
     st.divider()
-
     st.subheader("Historical SLA Performance")
-
-    met_count = int(sla["SLA Status"].eq("Met").sum())
-    breach_count = int(sla["SLA Status"].eq("Breached").sum())
-    missing_count = int(
-        sla["SLA Status"].eq("Response Not Recorded").sum()
-    )
-
-    evaluated = met_count + breach_count
-
-    compliance = (
-        f"{met_count / evaluated:.1%}"
-        if evaluated > 0
-        else "N/A"
-    )
 
     s1, s2, s3, s4 = st.columns(4)
 
     s1.metric("SLA Met", met_count)
-    s2.metric("SLA Breached", breach_count)
-    s3.metric("Response Not Recorded", missing_count)
+    s2.metric("SLA Breached", breached_count)
+    s3.metric("Cannot Evaluate SLA", unevaluated_count)
     s4.metric("SLA Compliance", compliance)
 
     st.caption(
-        "Historical metrics use recorded fictional timestamps. "
-        "Missing responses are excluded from compliance percentage."
+        f"Compliance uses {evaluated_count} evaluable ticket(s). "
+        "Tickets with missing or invalid data or policies are excluded. "
+        "All records are fictional."
     )
 
-    st.divider()
-
-    st.subheader("Current SLA Risk Simulation")
-
-    if valid_ids:
-        selected_id = st.session_state["sim_ticket_id"]
-
-        selected_row = valid_targets[
-            valid_targets["ticket_id"] == selected_id
-        ].iloc[0]
-
-        target = float(
-            selected_row["first_response_minutes"]
+    if unevaluated_count:
+        st.warning(
+            f"{unevaluated_count} ticket(s) cannot be evaluated. "
+            "Open SLA Monitoring to see the specific reasons."
         )
 
-        elapsed = st.session_state["sim_elapsed"]
-
-        status = simulation_status(elapsed, target)
-
-        a, b, c = st.columns(3)
-
-        a.metric("Simulated Ticket", selected_id)
-        b.metric("Elapsed Minutes", elapsed)
-        c.metric("Risk Status", status)
-
-        if status == "BREACHED":
-            st.error(
-                "Simulated SLA breached. Immediate escalation recommended."
-            )
-
-        elif status == "AT RISK":
-            st.warning(
-                "Simulated ticket is approaching its SLA deadline."
-            )
-
-        else:
-            st.success(
-                "Simulated ticket is currently on track."
-            )
-
-        st.info(simulation_action(status))
-
-        st.caption(
-            "Change the slider in SLA Risk Alerts to update "
-            "this Overview indicator. This is not live monitoring."
-        )
-
-    else:
-        st.info(
-            "No valid SLA policy is available for simulation."
-        )
+    st.info(
+        "Meeting a first-response SLA does not mean the issue "
+        "has been resolved."
+    )
 
 
 # --------------------------------------------------
@@ -465,24 +451,22 @@ with overview_tab:
 
 with queue_tab:
     st.header("Support Ticket Queue")
-
-    st.caption(
-        "Fictional clinic support scenarios for portfolio demonstration."
-    )
+    st.caption("Fictional clinic support scenarios.")
 
     st.metric("Tickets in Queue", len(filtered))
 
     st.dataframe(
         filtered,
         use_container_width=True,
-        hide_index=True
+        hide_index=True,
     )
 
     st.download_button(
-        label="Download Ticket Queue",
+        "Download Ticket Queue",
         data=filtered.to_csv(index=False),
         file_name="clinic_ticket_queue.csv",
-        mime="text/csv"
+        mime="text/csv",
+        key="download_queue",
     )
 
 
@@ -494,26 +478,20 @@ with sla_tab:
     st.header("Historical SLA Monitoring")
 
     st.caption(
-        "First-response SLA calculations using fictional ticket timestamps."
+        "First-response calculations use elapsed minutes. "
+        "Naive timestamps are interpreted as UTC. "
+        "Business-hour schedules and resolution SLAs are not calculated."
     )
-
-    met = int(sla["SLA Status"].eq("Met").sum())
-    breached = int(sla["SLA Status"].eq("Breached").sum())
-    missing = int(
-        sla["SLA Status"].eq("Response Not Recorded").sum()
-    )
-
-    evaluated = met + breached
 
     a, b, c = st.columns(3)
 
-    a.metric("SLA Met", met)
-    b.metric("SLA Breached", breached)
-    c.metric("Response Not Recorded", missing)
+    a.metric("SLA Met", met_count)
+    b.metric("SLA Breached", breached_count)
+    c.metric("Cannot Evaluate SLA", unevaluated_count)
 
     st.metric(
         "First-Response SLA Compliance",
-        f"{met / evaluated:.1%}" if evaluated else "N/A"
+        compliance,
     )
 
     st.subheader("Ticket SLA Details")
@@ -523,53 +501,76 @@ with sla_tab:
         "clinic",
         "issue_type",
         "priority",
+        "created_at",
+        "first_responded_at",
         "first_response_minutes",
         "response_minutes",
-        "SLA Status"
+        "SLA Status",
     ]
 
     st.dataframe(
         sla[display_columns],
         use_container_width=True,
-        hide_index=True
+        hide_index=True,
     )
 
     if not sla.empty:
         st.subheader("SLA Status Distribution")
+        st.bar_chart(sla["SLA Status"].value_counts())
 
-        st.bar_chart(
-            sla["SLA Status"].value_counts()
-        )
+    st.subheader("Review Alerts")
 
-    st.subheader("Support Escalation Alerts")
-
-    if breached:
+    if breached_count:
         st.error(
-            f"{breached} ticket(s) breached the historical SLA."
+            f"{breached_count} ticket(s) exceeded the recorded "
+            "first-response target. Review the delay and follow-up."
         )
 
-    if missing:
-        st.warning(
-            f"{missing} ticket(s) have no recorded first response."
+    unevaluated = sla[
+        ~sla["SLA Status"].isin(["Met", "Breached"])
+    ]
+
+    for label, count in (
+        unevaluated["SLA Status"].value_counts().items()
+    ):
+        st.warning(f"{count} ticket(s): {label}")
+
+    if filtered.empty:
+        st.info("No tickets match the selected filters.")
+    elif not breached_count and not unevaluated_count:
+        st.success(
+            "All selected tickets have evaluable responses "
+            "within their targets."
         )
 
-    for label in [
-        "Creation Time Missing/Invalid",
-        "Invalid Response Timestamp",
-        "Policy Missing"
-    ]:
-        count = int(sla["SLA Status"].eq(label).sum())
+    with st.expander("How to interpret these statuses"):
+        st.markdown(
+            """
+- **Met:** Recorded response was within the target.
+- **Breached:** Recorded response exceeded the target.
+- **Response Not Recorded:** Creation time is valid, but the
+  response timestamp is absent.
+- **Creation Time Missing/Invalid:** The starting time is unknown.
+- **Invalid Response Timestamp:** The response is unparseable
+  or earlier than creation.
+- **Policy Missing/Invalid:** No unique, positive, finite target
+  is available.
+- **Duplicate Timestamp Records:** More than one timestamp row
+  exists for the ticket.
 
-        if count:
-            st.warning(
-                f"{count} ticket(s): {label}"
-            )
+**Cannot Evaluate SLA** groups every status other than Met or Breached.
+
+This historical report does not calculate whether an unanswered
+ticket has passed its deadline as of the current time.
+            """
+        )
 
     st.download_button(
-        label="Download SLA Report",
-        data=sla.to_csv(index=False),
+        "Download SLA Report",
+        data=sla[display_columns].to_csv(index=False),
         file_name="clinic_sla_report.csv",
-        mime="text/csv"
+        mime="text/csv",
+        key="download_sla",
     )
 
 
@@ -578,16 +579,16 @@ with sla_tab:
 # --------------------------------------------------
 
 with routing_tab:
-    st.header("Automated Ticket Routing")
+    st.header("Suggested Ticket Routing")
 
     st.caption(
-        "Rule-based support team assignments. "
-        "Teams are illustrative, not verified vendor structures."
+        "Rule-based initial ownership suggestions. "
+        "Teams are illustrative. Escalation depends on findings "
+        "and business impact."
     )
 
     if filtered.empty:
-        st.info("No tickets match the current filters.")
-
+        st.info("No tickets match the selected filters.")
     else:
         routed = pd.DataFrame(
             [
@@ -598,46 +599,31 @@ with routing_tab:
             ]
         )
 
-        r1, r2, r3 = st.columns(3)
+        r1, r2 = st.columns(2)
 
         r1.metric("Tickets Routed", len(routed))
         r2.metric(
-            "Support Teams",
-            routed["assigned_team"].nunique()
+            "Suggested Teams",
+            routed["suggested_initial_team"].nunique(),
         )
-        r3.metric(
-            "Urgent Tickets",
-            int(routed["priority"].eq("Urgent").sum())
-        )
-
-        st.subheader("Ticket Assignment Queue")
 
         st.dataframe(
             routed,
             use_container_width=True,
-            hide_index=True
+            hide_index=True,
         )
 
-        st.subheader("Tickets by Assigned Team")
-
+        st.subheader("Tickets by Initial Team")
         st.bar_chart(
-            routed["assigned_team"].value_counts()
+            routed["suggested_initial_team"].value_counts()
         )
-
-        st.subheader("Routing Decisions")
-
-        for _, ticket in routed.iterrows():
-            st.info(
-                f"{ticket['ticket_id']} | "
-                f"{ticket['issue_type']} → "
-                f"{ticket['assigned_team']}"
-            )
 
         st.download_button(
-            label="Download Routing Report",
+            "Download Routing Report",
             data=routed.to_csv(index=False),
             file_name="clinic_ticket_routing.csv",
-            mime="text/csv"
+            mime="text/csv",
+            key="download_routing",
         )
 
 
@@ -646,127 +632,97 @@ with routing_tab:
 # --------------------------------------------------
 
 with risk_tab:
-    st.header("Proactive SLA Risk Alerts")
+    st.header("Hypothetical SLA Risk Alerts")
 
     st.caption(
-        "Interactive hypothetical simulation. "
-        "Not real-time monitoring or machine learning."
+        "Simulation only. Assumes the selected ticket has not "
+        "received a first response. It does not change historical results."
     )
 
-    if not valid_ids:
+    if valid_targets.empty:
         st.info(
-            "No valid SLA policies are available for simulation."
+            "No selected tickets have a valid SLA target "
+            "for simulation."
         )
-
     else:
-        st.selectbox(
+        valid_ids = valid_targets["ticket_id"].tolist()
+
+        if st.session_state.get("risk_ticket") not in valid_ids:
+            st.session_state["risk_ticket"] = valid_ids[0]
+
+        selected_id = st.selectbox(
             "Select a Support Ticket",
             options=valid_ids,
-            key="sim_ticket_id"
+            key="risk_ticket",
         )
 
         selected = valid_targets[
-            valid_targets["ticket_id"]
-            == st.session_state["sim_ticket_id"]
+            valid_targets["ticket_id"].eq(selected_id)
         ].iloc[0]
 
-        target = float(
-            selected["first_response_minutes"]
-        )
-
-        slider_max = max(
-            30,
-            int(target * 2),
-            int(st.session_state["sim_elapsed"])
-        )
+        target = float(selected["first_response_minutes"])
 
         st.write(
-            f"**Issue:** {selected['issue_type']} | "
-            f"**Priority:** {selected['priority']} | "
-            f"**SLA Target:** {target:g} minutes"
+            f"**Issue:** {selected['issue_type']} · "
+            f"**Priority:** {selected['priority']} · "
+            f"**Target:** {target:g} minutes"
         )
 
-        st.slider(
-            "Simulated minutes since ticket creation "
-            "(no first response yet)",
+        elapsed = st.slider(
+            "Simulated elapsed minutes with no first response",
             min_value=0,
-            max_value=slider_max,
+            max_value=max(30, int(target * 2)),
+            value=0,
             step=1,
-            key="sim_elapsed"
+            key=f"elapsed_{selected_id}_{target:g}",
         )
 
-        elapsed = st.session_state["sim_elapsed"]
+        risk_status = simulation_status(elapsed, target)
+        remaining = max(target - elapsed, 0)
 
-        status = simulation_status(
-            elapsed,
-            target
-        )
-
-        remaining = target - elapsed
-
-        st.progress(
-            min(elapsed / target, 1.0)
-        )
+        st.progress(min(elapsed / target, 1.0))
 
         m1, m2, m3 = st.columns(3)
 
-        m1.metric("Elapsed Time", f"{elapsed} min")
-        m2.metric("SLA Target", f"{target:g} min")
-        m3.metric(
-            "Time Remaining",
-            f"{max(remaining, 0):g} min"
-        )
+        m1.metric("Elapsed", f"{elapsed} min")
+        m2.metric("Target", f"{target:g} min")
+        m3.metric("Time Remaining", f"{remaining:g} min")
 
-        if status == "BREACHED":
-            st.error(
-                "BREACHED — The simulated response deadline "
-                "has passed."
-            )
-
-        elif status == "AT RISK":
+        if risk_status == "BREACHED":
+            st.error("BREACHED — Simulated deadline has passed.")
+        elif risk_status == "AT RISK":
             st.warning(
-                "AT RISK — At least 80% of the SLA window "
-                "has elapsed."
+                "AT RISK — At least 80% of the response "
+                "window has elapsed."
             )
-
         else:
-            st.success(
-                "ON TRACK — Below the warning threshold."
-            )
+            st.success("ON TRACK — Below the warning threshold.")
 
-        st.subheader("Recommended Support Action")
+        st.subheader("Recommended Action")
+        st.info(simulation_action(risk_status))
 
-        st.info(
-            simulation_action(status)
-        )
-
-        st.subheader("Simulation Result")
-
-        result = pd.DataFrame(
+        simulation_result = pd.DataFrame(
             [
                 {
-                    "ticket_id": st.session_state["sim_ticket_id"],
+                    "ticket_id": selected_id,
                     "priority": selected["priority"],
                     "sla_target_minutes": target,
                     "simulated_elapsed_minutes": elapsed,
                     "remaining_minutes": remaining,
-                    "risk_status": status,
-                    "recommended_action": simulation_action(status)
+                    "risk_status": risk_status,
+                    "recommended_action": simulation_action(
+                        risk_status
+                    ),
                 }
             ]
         )
 
-        st.dataframe(
-            result,
-            use_container_width=True,
-            hide_index=True
-        )
-
         st.download_button(
-            label="Download Risk Simulation",
-            data=result.to_csv(index=False),
+            "Download Risk Simulation",
+            data=simulation_result.to_csv(index=False),
             file_name="clinic_sla_risk_simulation.csv",
-            mime="text/csv"
+            mime="text/csv",
+            key="download_simulation",
         )
 
 
@@ -775,10 +731,8 @@ with risk_tab:
 # --------------------------------------------------
 
 st.divider()
-
 st.caption(
-    "Clinic Support Operations Lab | "
-    "Fictional portfolio demonstration | "
-    "No real patient data | "
-    "No live SLA monitoring or AI predictions"
+    "Clinic Support Operations Lab · Independent fictional portfolio "
+    "demonstration · No real patient data · "
+    "No live monitoring or AI predictions"
 )
