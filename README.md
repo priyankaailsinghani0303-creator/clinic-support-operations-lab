@@ -39,9 +39,6 @@ response times and identifies tickets requiring attention.
 [View Python SLA Checker](sla_checker.py)
 
 
-## Skills Demonstrated
-
-
 ## Customer Support Documentation
 
 ### Customer Help Article
@@ -54,6 +51,8 @@ A customer-facing troubleshooting guide written for nontechnical clinic staff, d
 
 Documents ticket triage, troubleshooting workflows, customer communication, engineering escalation, and support handoffs.
 
+
+## Skills Demonstrated
 
 - Support ticket triage and prioritization
 - First-response SLA monitoring
