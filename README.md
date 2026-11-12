@@ -69,7 +69,7 @@ The SOP defines what an engineering handoff should contain:
 
 Routing suggestions do not count as accepted assignments. The support owner continues customer communication until a receiving owner accepts the handoff.
 
-## Explore the Dashboard ### [Open the Live Dashboard →](https://clinic-support-operations-lab-qzcgaprlcsp8dvyn7ql4rb.streamlit.app/)
+## Explore the Dashboard [Open the Live Dashboard →](https://clinic-support-operations-lab-qzcgaprlcsp8dvyn7ql4rb.streamlit.app/)
 
 | View | What It Shows |
 |---|---|
