@@ -27,17 +27,39 @@ Select **All Facilities**. The sample appointment appears at **08:00** under **B
 
 ![Appointment visible with All Facilities selected](screenshots/01-appointment-visible.jpg)
 
+**Walkthrough narration — draft:**
+
+> Hi, I’m Priyanka. This is a simulated calendar troubleshooting walkthrough using the OpenEMR demo.
+>
+> The reported problem is that an appointment isn’t appearing in the calendar. Before creating another booking, I would confirm the appointment date, provider, and selected facility.
+>
+> Here, the sample appointment is visible at eight o’clock on November nineteenth, under Billy Smith, with All Facilities selected.
+
 ### 2. Reproduce the visibility issue
 
 Select **Aurora Breadth Clinic** in the facility dropdown. The appointment disappears from the current view.
 
 ![Appointment hidden with Aurora Breadth Clinic selected](screenshots/02-appointment-hidden.jpg)
 
+**Walkthrough narration — draft:**
+
+> When Aurora Breadth Clinic is selected, the appointment disappears. The date and provider remain unchanged, so the facility filter is the relevant difference.
+
 ### 3. Restore the view and verify
 
 **Verification step to repeat:** Select **All Facilities** again and confirm the same appointment appears at **08:00** before creating any replacement booking.
 
-The original restoration image is byte-for-byte identical to image 01. It is not presented as independent after-action evidence. A fresh restoration capture is still needed.
+![Illustration of the expected restored view with All Facilities selected — reused initial image](screenshots/03-appointment-restored.jpg)
+
+**Image note:** This third image is byte-for-byte identical to image 01. It illustrates the expected restored view, not an independently captured restoration. A fresh restoration capture is still needed.
+
+**Walkthrough narration — draft, matched to the available evidence:**
+
+> To restore the view, I would select All Facilities again and check that the same appointment appears. This image illustrates that expected view; it reuses the first screenshot rather than showing a fresh restoration capture.
+>
+> The visible and hidden screenshots are consistent with the appointment being hidden by the facility filter. I would ask the clinic user to repeat that check and confirm they can locate the original booking before creating another appointment. This result does not establish a software defect.
+>
+> If it remained missing with the correct filters, I would check the booking record and collect the findings for further investigation.
 
 ## Expected versus actual behavior
 
