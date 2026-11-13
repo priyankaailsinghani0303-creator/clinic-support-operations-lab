@@ -89,7 +89,7 @@ Downloadable CSV reports support further review and handoffs.
 | Implemented or Written | Documented Procedure / Future Evidence |
 |---|---|
 | Interactive dashboard and fictional ticket queue | Confirmed software-defect reproduction |
-| [Calendar filter investigation: visible and hidden appointment screenshots](docs/calendar-reproduction.md) | Return to All Facilities and confirm the original appointment appears before creating another booking; narrated walkthrough not yet recorded |
+| [Calendar filter investigation: visible and hidden appointment screenshots](docs/calendar-reproduction.md) | Return to All Facilities and confirm the original appointment appears before creating another booking |
 | First-response SLA calculations and missing-data handling; separate written resolution exercise | Actual resolution records and automated active-queue resolution tracking |
 | Suggested initial team routing and fictional written handoff | Accepted operational assignments and handoffs |
 | Customer-facing help article | Recorded screen-share walkthrough |
