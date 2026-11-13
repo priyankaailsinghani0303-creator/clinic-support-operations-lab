@@ -133,8 +133,6 @@ python3 -m unittest discover -s tests -v
 
 ## Evidence status
 
-The calendar visible/hidden images are demo screenshots. The former restoration image duplicates the initial image and is not independent proof of restoration. A fresh capture remains outstanding.
+The calendar visible/hidden images are demo screenshots.
 
-The payment case, handoff and resolution/pattern exercise are fictional written work samples, not completed live investigations, accepted assignments or customer outcomes. North American shift availability must be confirmed directly with the candidate; the SOP describes the role's coverage requirement.
-
-Local verification on November 12, 2026: the seven existing shared-rule tests passed. The dashboard was checked locally for initial rendering, Medium-only filtering and empty selection. This does not establish that the hosted dashboard is running the same version. No hosted verification or successful payment test is claimed.
+The payment case, handoff and resolution/pattern exercise are fictional written work samples, not completed live investigations, accepted assignments or customer outcomes.
