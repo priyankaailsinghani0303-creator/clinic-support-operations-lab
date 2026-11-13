@@ -1,5 +1,15 @@
 # Clinic Support Operations Lab
 
+## New: Interactive Support Workbench
+
+An independently runnable practice application for calendar, payment and messaging cases. Create a synthetic ticket, accept ownership, investigate evidence, record a response, verify the workflow and close with a documented summary. A session-local SQLite database retains records across reruns; downloadable reports preserve your practice work.
+
+**Run:** `streamlit run workbench.py` after installing `requirements.txt`.
+
+**[Workbench guide and Chromebook setup](docs/workbench-guide.md)** · **[Application](workbench.py)** · **[Workflow and storage](workbench_core.py)**
+
+All findings are deterministic simulator fixtures, not observations about Health Hue or live customer outcomes. The workbench is a functional portfolio MVP with temporary, isolated sessions; it is not production healthcare software. It does not change the evidence status of the historical cases below.
+
 A healthcare SaaS support portfolio built for Platform Support Specialist roles- shows how I triage, troubleshoot, document, and escalate booking/payment/messaging issues for busy clinics.
 
 I am a medical student with approximately 3 years in patient/client support, including 1.5 years in hospital administration (appointments, patient calls, billing queries, hospital software). This project applies that experience to platform support.
@@ -138,3 +148,4 @@ The calendar visible/hidden images are demo screenshots. The former restoration 
 The payment case, handoff and resolution/pattern exercise are fictional written work samples, not completed live investigations, accepted assignments or customer outcomes. North American shift availability must be confirmed directly with the candidate; the SOP describes the role's coverage requirement.
 
 Local verification on November 12, 2026: the seven existing shared-rule tests passed. The dashboard was checked locally for initial rendering, Medium-only filtering and empty selection. This does not establish that the hosted dashboard is running the same version. No hosted verification or successful payment test is claimed.
+
