@@ -18,7 +18,7 @@ No local installation required to review the dashboard.
 | **[Payment Case & Customer Conversation](docs/payment-case.md)** | Fictional investigation record, frustrated-customer reply, evidence gaps and proposed specialist handoff |
 | **[Three-Ticket Shift Handoff](docs/shift-handoff.md)** | Proposed owners, next actions and update deadlines; no accepted assignments claimed |
 | **[Resolution & Pattern Exercise](docs/resolution-pattern-exercise.md)** | Separate synthetic resolution calculations and recurring-issue review |
-| **[Calendar Troubleshooting Investigation](docs/calendar-reproduction.md)** | Demo screenshots of visible/hidden states, reproduction steps, evidence limitations, customer guidance and escalation judgment |
+| **[Calendar Troubleshooting Investigation](docs/calendar-reproduction.md)** | Demo screenshots comparing visible/hidden appointment states, reproduction steps, customer guidance and escalation judgment |
 | **[Live Support Dashboard](https://clinic-support-operations-lab-qzcgaprlcsp8dvyn7ql4rb.streamlit.app/)** | Ticket filtering, first-response SLA results, incomplete records, suggested routing, and simulated risk alerts |
 | **[Customer Help Article: Missing Appointment](docs/help-article.md)** | Simple troubleshooting steps for nontechnical clinic staff, with clear guidance on when to contact support |
 | **[Platform Support SOP](docs/platform-support-sop.md)** | Triage, troubleshooting, customer updates, bug-report requirements, escalation, screen-sharing procedures, and shift handoffs |
@@ -89,7 +89,7 @@ Downloadable CSV reports support further review and handoffs.
 | Implemented or Written | Documented Procedure / Future Evidence |
 |---|---|
 | Interactive dashboard and fictional ticket queue | Confirmed software-defect reproduction |
-| [Calendar filter investigation with screenshots](docs/calendar-reproduction.md) | Fresh independent restoration capture and narrated walkthrough |
+| [Calendar filter investigation: visible and hidden appointment screenshots](docs/calendar-reproduction.md) | Return to All Facilities and confirm the original appointment appears before creating another booking; narrated walkthrough not yet recorded |
 | First-response SLA calculations and missing-data handling; separate written resolution exercise | Actual resolution records and automated active-queue resolution tracking |
 | Suggested initial team routing and fictional written handoff | Accepted operational assignments and handoffs |
 | Customer-facing help article | Recorded screen-share walkthrough |
@@ -133,6 +133,6 @@ python3 -m unittest discover -s tests -v
 
 ## Evidence status
 
-The calendar visible/hidden images are demo screenshots.
+The calendar screenshots demonstrate the appointment visible under All Facilities and hidden under Aurora Breadth Clinic. Returning to All Facilities is a recommended verification step to repeat; a separate restoration capture is not provided.
 
 The payment case, handoff and resolution/pattern exercise are fictional written work samples, not completed live investigations, accepted assignments or customer outcomes.
