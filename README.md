@@ -10,8 +10,7 @@ I am a medical student with approximately 3 years in patient/client support, inc
 
 No local installation required to review the dashboard.
 
-> Independent portfolio project using fictional clinics, tickets, and SLA targets. No real patient information is included. Not affiliated with Health Hue Digital.
-
+> Independent portfolio project using fictional clinics, tickets, and SLA targets. No real patient information is included.
 ## Start Here
 
 | Work Sample | What to Look For |
