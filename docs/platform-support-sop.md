@@ -107,7 +107,7 @@ Before starting each shift, the Platform Support Specialist confirms:
 - [ ] Quiet and private workspace suitable for customer calls.
 - [ ] Headset, microphone and internet connection tested.
 - [ ] Computer locked when stepping away.
-- [ ] Authorized access to Health Hue Hub support environment confirmed.
+- [ ] Authorized access to company support environment confirmed.
 - [ ] Support ticket queue opened and reviewed.
 - [ ] Email and live chat channels checked.
 - [ ] Internal support and escalation communication channels opened.
@@ -127,7 +127,7 @@ Before starting each shift, the Platform Support Specialist confirms:
 | Standard | Requirement |
 |---|---|
 | First response | Acknowledge incoming requests within the applicable SLA target. |
-| Greeting | "Thank you for contacting Health Hue Support. This is [Name]. How can I help you today?" |
+| Greeting | "Thank you for contacting company Support. This is [Name]. How can I help you today?" |
 | Tone | Friendly, professional, calm and solution-oriented. |
 | Language | Clear, simple English without unnecessary technical jargon. |
 | Understanding | Allow the customer to explain the issue without interruption. |
@@ -486,7 +486,7 @@ Before escalating, confirm that the report includes:
 
 ## 13. Screen-Share Support & Customer Training
 
-**Goal:** Guide clinic staff through platform features, demonstrate troubleshooting steps and help customers use Health Hue Hub confidently.
+**Goal:** Guide clinic staff through platform features, demonstrate troubleshooting steps and help customers use platform confidently.
 
 ### 13.1 Screen-Share Support Standards
 
@@ -560,7 +560,7 @@ Every customer interaction must be documented in the support ticket.
 
 ### 14.2 Priority-Based SLA Targets
 
-The following are illustrative portfolio targets, not verified Health Hue contractual SLAs. `sla_policy.csv` is the canonical numeric source; this table mirrors it. Both scripts and the dashboard use `support_rules.py`.
+The following are illustrative portfolio targets, not verified contractual SLAs. `sla_policy.csv` is the canonical numeric source; this table mirrors it. Both scripts and the dashboard use `support_rules.py`.
 
 Calculations use elapsed minutes in UTC; naive timestamps are treated as UTC. Coverage hours do not pause this demonstration clock. Business-hour calendars, holidays, resolution monitoring and live unanswered-ticket deadlines are not implemented. Resolution targets below are reference values only.
 
