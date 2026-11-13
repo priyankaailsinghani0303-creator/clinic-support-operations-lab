@@ -58,4 +58,4 @@ If the issue cannot be resolved, further technical investigation may be required
 
 ---
 
-**Portfolio disclaimer:** This article was independently created for a fictional healthcare SaaS support scenario. It is not official Health Hue documentation, and platform-specific steps have not been verified.
+**Portfolio disclaimer:** This article was independently created for a fictional healthcare SaaS support scenario. 
