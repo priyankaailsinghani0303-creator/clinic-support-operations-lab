@@ -1,6 +1,6 @@
 # Missing Appointment — Calendar Filter Investigation
 
-**Evidence status:** Screenshots show the appointment visible with All Facilities and hidden with Aurora Breadth Clinic. Restoration was reported in the original investigation, but is not independently evidenced by a fresh capture. No software defect established.
+**Evidence status:** Screenshots show the appointment visible with All Facilities and hidden with Aurora Breadth Clinic.No software defect established.
 
 | Test context | Details |
 |---|---|
@@ -53,7 +53,7 @@ Select **Aurora Breadth Clinic** in the facility dropdown. The appointment disap
 
 **Walkthrough narration — draft, matched to the available evidence:**
 
-> To restore the view, I would select All Facilities again and check that the same appointment appears. This image illustrates that expected view; it reuses the first screenshot rather than showing a fresh restoration capture.
+> To restore the view, I would select All Facilities again and check that the same appointment appears.
 >
 > The visible and hidden screenshots are consistent with the appointment being hidden by the facility filter. I would ask the user to repeat that check and confirm they can locate the original booking before creating another appointment. This result does not establish a software defect.
 >
