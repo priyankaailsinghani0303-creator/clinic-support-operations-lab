@@ -8,7 +8,7 @@
 | Capture date | November 12, 2026 |
 | Calendar date | November 19, 2026 |
 | Sample appointment | 08:00, Stone, Alex; provider Billy Smith |
-| Method | AI-assisted browser investigation using existing public-demo data |
+| Method | browser investigation using existing public-demo data |
 | Changes made | Calendar date and facility view only; no appointment created, edited, or deleted |
 
 ## Support scenario
