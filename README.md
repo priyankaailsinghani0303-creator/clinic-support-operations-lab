@@ -2,7 +2,7 @@
 
 A healthcare SaaS support portfolio built for Platform Support Specialist roles- shows how I triage, troubleshoot, document, and escalate booking/payment/messaging issues for busy clinics.
 
-I am a medical graduate with approximately 3 years in patient/client support, including 1.5 years in hospital administration (appointments, patient calls, billing queries, hospital software). This project applies that experience to platform support.
+I am a medical graduate with approximately 3 years in patient/client support experience in hospital administration (appointments, patient calls, billing queries, hospital software). This project applies that experience to platform support.
 
 **My approach:** Understand the impact, explain the next step clearly, investigate systematically, and keep ownership through escalation.
 
